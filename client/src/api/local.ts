@@ -1,4 +1,4 @@
-export function localSync(type: string, data: { [key: string]: unknown }) {
+export function localSync(type: string, data: any) {
     localStorage.setItem(type, JSON.stringify(data));
 }
 

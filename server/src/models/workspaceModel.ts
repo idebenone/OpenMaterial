@@ -1,7 +1,6 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/pgConnection";
 import { randomUUID } from "crypto";
-import zlib from "zlib";
 
 interface WorkspaceAttributes {
     workspace_id: string;

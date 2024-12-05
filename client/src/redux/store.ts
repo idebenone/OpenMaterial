@@ -12,8 +12,18 @@ export const store = configureStore({
         node: nodeSlice,
         edge: edgeSlice,
         activeNodeEdge: activeNodeEdgeSlice,
+
+        /**
+         * Entire file directory
+         */
         structure: fileDirectorySlice,
+        /**
+         * Files in wprkspace
+         */
         workspaceFiles: workspaceFilesSlice,
+        /**
+         * File that is currently active
+         */
         activeFile: activeFieSlice
     }
 });

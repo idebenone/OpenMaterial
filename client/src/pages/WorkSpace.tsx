@@ -1,4 +1,8 @@
-import { useState, memo, useCallback, useEffect } from "react";
+import { useState, memo, useCallback } from "react";
+import { useAtom } from "jotai";
+
+import { ActiveFileAtom, WorkspaceFilesAtom } from "@/lib/atoms";
+import { WorkspaceFile } from "@/lib/interface";
 
 import {
   ResizableHandle,
@@ -9,14 +13,7 @@ import { File, X } from "lucide-react";
 
 import WorkSpacePanel from "@/components/WorkSpacePanel";
 import ReactFlowPanel from "@/components/ReactFlowPanel";
-import FileDirectoryPanel from "@/components/FileDirectoryPanel";
-import { useDispatch, useSelector } from "react-redux";
-import { localFetch } from "@/api/local";
-import { setDirectory } from "@/redux/slices/fileDirectorySlice";
-import { WorkspaceFile } from "@/lib/interface";
-import { RootState } from "@/redux/store";
-import { removeWorkspaceFile } from "@/redux/slices/workspaceFilesSlice";
-import { setActiveFile } from "@/redux/slices/activeFieSlice";
+import FileDirectoryPanel from "@/components/DirectoryPanel/FileDirectoryPanel";
 
 const FileTab = memo(
   ({
@@ -58,19 +55,6 @@ const FileTab = memo(
           onClick={onClose}
         />
       </span>
-
-      // <span
-      //   className={`flex justify-between items-center p-1 cursor-pointer rounded-md border`}
-      // >
-      //   <span className="flex gap-2 items-center">
-      //     <File className="h-4 w-4" />
-      //     <p className={`text-xs font-semibold`}>{file.file_name}</p>
-      //   </span>
-      //   <X
-      //     className={`h-4 w-4 cursor-pointer hover:bg-neutral-300 p-0.5 rounded-sm`}
-      //     onClick={onClose}
-      //   />
-      // </span>
     );
   }
 );
@@ -102,57 +86,33 @@ const FileTabList = ({
 };
 
 const WorkSpace = () => {
-  const dispatch = useDispatch();
-  const _workspaceFiles = useSelector(
-    (state: RootState) => state.workspaceFiles
-  );
-  const activeFile = useSelector((state: RootState) => state.activeFile);
-  const [fileDirectoryState, setFileDirectoryState] = useState<any>({
+  const [workspaceFiles, setWorkspaceFiles] = useAtom(WorkspaceFilesAtom);
+  const [activeFile, setActiveFile] = useAtom(ActiveFileAtom);
+  const [fileDirectoryState, setFileDirectoryState] = useState<{
+    state: boolean;
+    type: string;
+  }>({
     state: false,
     type: "",
   });
 
   const handleFileSelect = useCallback((file: WorkspaceFile) => {
-    dispatch(setActiveFile(file));
+    setActiveFile(file);
   }, []);
 
   const handleFileClose = useCallback((file_id: string) => {
-    dispatch(removeWorkspaceFile(file_id));
+    setWorkspaceFiles((prev) =>
+      prev.filter((file) => file.file_id !== file_id)
+    );
   }, []);
-
-  useEffect(() => {
-    console.log("FROM WORKSPACE", _workspaceFiles);
-  }, [_workspaceFiles]);
-
-  useEffect(() => {
-    const localStructure: any = localFetch("structure");
-    if (localStructure.length !== 0) {
-      dispatch(setDirectory(localStructure));
-    } else {
-      dispatch(
-        setDirectory({
-          id: "root",
-          name: "Getting Started",
-          type: "folder",
-          children: [
-            {
-              id: "child",
-              name: "Hello.txt",
-              type: "file",
-            },
-          ],
-        })
-      );
-    }
-  }, [dispatch]);
 
   return (
     <div className="h-full flex">
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
-          {_workspaceFiles.length !== 0 && (
+          {workspaceFiles.length !== 0 && (
             <FileTabList
-              files={_workspaceFiles}
+              files={workspaceFiles}
               activeFileId={activeFile.file_id}
               onSelect={handleFileSelect}
               onClose={handleFileClose}

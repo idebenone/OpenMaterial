@@ -6,6 +6,22 @@ import { Folder, FolderAttributes } from "../models/folderModel";
 import { RESPONSE } from "../utils/responses";
 
 /**
+ * Creates a workspace. 
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const createWorkspace = async (req: Request, res: Response) => {
+    const { user_id, workspace_name, workspace_description } = req.body();
+    if (!user_id || !workspace_name || !workspace_description) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
+
+    /**
+     * Create a workspace and assign a folder with a file containing welcome text.
+     */
+
+}
+
+/**
  * Fetches entire file directory of a workspace.
  * @param req 
  * @param res 

@@ -14,7 +14,7 @@ const router = createBrowserRouter([
     element: <Create />,
   },
   {
-    path: "workspace",
+    path: "workspace/:id",
     element: <WorkSpace />,
   },
 ]);
