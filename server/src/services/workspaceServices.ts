@@ -6,6 +6,12 @@ import { Folder, FolderAttributes } from "../models/folderModel";
 import { RESPONSE } from "../utils/responses";
 import { Workspace } from "../models/workspaceModel";
 
+/**
+ * Get all workspaces for an user.
+ * @param req 
+ * @param res 
+ * @returns 
+ */
 const getAllWorkspaces = async (req: Request, res: Response) => {
     try {
         const workspaces = await Workspace.findAll({ where: { user_id: "dummy" } });
@@ -43,6 +49,7 @@ const createWorkspace = async (req: Request, res: Response) => {
             {
                 file_id: uuidv4(),
                 file_name: "Readme",
+                file_content: "Welcome to OpenMaterial. Let's build a community together",
                 folder_id: newFolder.folder_id,
                 workspace_id: newWorkspace.workspace_id,
             },
@@ -57,6 +64,44 @@ const createWorkspace = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * Delete a workspace along with files and folders.
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const deleteWorkspace = async (req: Request, res: Response) => {
+    const workspace_id = req.params.id;
+    const transaction = await Workspace.sequelize?.transaction();
+    try {
+        if (!workspace_id) {
+            return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
+        }
+        const folders = await Folder.findAll({
+            where: { workspace_id },
+            transaction,
+        });
+        const folderIds = folders.map(folder => folder.folder_id);
+        await File.destroy({
+            where: { folder_id: folderIds },
+            transaction,
+        });
+        await Folder.destroy({
+            where: { workspace_id },
+            transaction,
+        });
+        await Workspace.destroy({
+            where: { workspace_id },
+            transaction,
+        });
+        await transaction?.commit();
+        return res.status(200).json(RESPONSE.OK("Workspace and its contents deleted successfully"));
+    } catch (error) {
+        console.error("Error deleting workspace:", error);
+        await transaction?.rollback();
+        return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
+    }
+};
 
 /**
  * Fetches entire file directory of a workspace.
@@ -173,4 +218,4 @@ const saveFileContent = async (req: Request, res: Response) => {
 
 }
 
-export { createFile, createFolder, createWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent };
+export { createFile, createFolder, createWorkspace, deleteWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent };

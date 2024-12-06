@@ -1,6 +1,10 @@
 import { CreateFile, CreateFolder, CreateWorkspace } from "@/lib/interface";
 import axios, { AxiosResponse } from "axios"
 
+/**
+ * Get all existing workspaces.
+ * @returns 
+ */
 export const getWorkspaces = async (): Promise<AxiosResponse> => {
     return axios.get(`/api/workspace`)
 }
@@ -12,6 +16,15 @@ export const getWorkspaces = async (): Promise<AxiosResponse> => {
  */
 export const createWorkspace = async (data: CreateWorkspace): Promise<AxiosResponse> => {
     return axios.post(`/api/workspace`, data);
+}
+
+/**
+ * Deletes a workspace along with files and folders.
+ * @param workspace_id 
+ * @returns 
+ */
+export const deleteWorkspace = async (workspace_id: string): Promise<AxiosResponse> => {
+    return axios.delete(`/api/workspace/${workspace_id}`);
 }
 
 /**

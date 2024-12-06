@@ -96,7 +96,7 @@ const TreeView: React.FC<TreeViewProps> = ({
               className="text-xs"
               onClick={() =>
                 item.type === "file" &&
-                onSetActiveFile(item.id, item.name, "Hello")
+                onSetActiveFile(item.id, item.name, item.content)
               }
             >
               {item.name}

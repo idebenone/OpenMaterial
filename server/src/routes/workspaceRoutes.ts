@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import { createFile, createFolder, createWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent } from "../services/workspaceServices";
+import { createFile, createFolder, createWorkspace, deleteWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent } from "../services/workspaceServices";
 
 const WORKSPACE = express();
 
@@ -15,6 +15,13 @@ WORKSPACE.get("/", async (req: Request, res: Response) => {
  */
 WORKSPACE.post("/", async (req: Request, res: Response) => {
     await createWorkspace(req, res);
+})
+
+/**
+ * Deletes an existing workspace.
+ */
+WORKSPACE.delete("/:id", async (req: Request, res: Response) => {
+    await deleteWorkspace(req, res);
 })
 
 /**

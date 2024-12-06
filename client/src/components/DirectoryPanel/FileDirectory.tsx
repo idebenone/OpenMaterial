@@ -30,6 +30,7 @@ const FileDirectory = () => {
   const { id } = useParams();
   const fileStructureAtom = useAtomValue(WorkspaceDirectoryAtom);
   const setActiveFile = useSetAtom(ActiveFileAtom);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setWorkspaceFiles] = useAtom(WorkspaceFilesAtom);
 
   const [fileStructure, setFileStructure] = useState<Folder | null>(null);
@@ -83,19 +84,17 @@ const FileDirectory = () => {
     try {
       if (fileStructure) {
         const newFolder = createFolder(folder_name);
-        const response = await createFolderInWorkspace({
+        await createFolderInWorkspace({
           workspace_id: id!,
           folder_name: folder_name,
           parent_id,
         });
 
-        if (response.statusText.includes("200")) {
-          setFileStructure(
-            updateFolder(fileStructure, parent_id, (folder) =>
-              addItem(folder, newFolder)
-            )
-          );
-        }
+        setFileStructure(
+          updateFolder(fileStructure, parent_id, (folder) =>
+            addItem(folder, newFolder)
+          )
+        );
       }
     } catch (error) {
       console.log(error);

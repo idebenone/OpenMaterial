@@ -1,6 +1,7 @@
 export type File = {
     id: string;
     name: string;
+    content: string;
     type: 'file';
     children?: never;
 }

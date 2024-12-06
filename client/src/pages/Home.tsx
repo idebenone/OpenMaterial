@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { createWorkspace, getWorkspaces } from "@/api/workspace";
+import {
+  createWorkspace,
+  deleteWorkspace,
+  getWorkspaces,
+} from "@/api/workspace";
 
 import { Check, EllipsisVertical, Pencil, Trash, X } from "lucide-react";
 import {
@@ -61,6 +65,19 @@ export default function Home() {
     }
   };
 
+  const handleDeleteWorkspace = async (workspace_id: string) => {
+    try {
+      setLoading(true);
+      await deleteWorkspace(workspace_id);
+      toast.success("Workspace has been deleted successfully");
+      handleFetchWorkspaces();
+    } catch (error) {
+      toast.error("Couldn't create a workspace. Sorry!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     handleFetchWorkspaces();
   }, []);
@@ -86,7 +103,14 @@ export default function Home() {
                     <p>Rename</p>
                     <Pencil className="h-4 w-4" />
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="flex items-center justify-between cursor-pointer">
+                  <DropdownMenuItem
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteWorkspace(workspace.workspace_id);
+                    }}
+                  >
                     <p className="text-destructive">Delete</p>
                     <Trash className="h-4 w-4 text-destructive" />
                   </DropdownMenuItem>
@@ -108,7 +132,7 @@ export default function Home() {
           onChange={(e) => setName(e.target.value)}
         />
         <Textarea
-          placeholder="some description?"
+          placeholder="some description would be nice..."
           onChange={(e) => setDescription(e.target.value)}
         />
 
@@ -125,7 +149,7 @@ export default function Home() {
           </Button>
           <Button disabled={!name && loading} onClick={handleCreateWorkspace}>
             {loading ? (
-              <span>
+              <span className="flex justify-center items-center gap-2">
                 <p>Creating</p>
                 <Spinner />
               </span>

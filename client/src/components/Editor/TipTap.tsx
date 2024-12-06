@@ -1,17 +1,41 @@
-import { EditorProvider, FloatingMenu, BubbleMenu } from "@tiptap/react";
+import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import Toolbar from "./Toolbar";
 
 const extensions = [StarterKit];
 
-const content = "<p>Hello World!</p>";
+interface TipTapProps {
+  toolbar: boolean;
+  content: string;
+  editable: boolean;
+  onUpdate?: (data: string) => void;
+}
 
-const Tiptap = () => {
+export default function Tiptap({
+  toolbar,
+  content,
+  editable,
+  onUpdate,
+}: TipTapProps) {
+  const editor = useEditor({
+    content,
+    extensions,
+    editable,
+    onUpdate: ({ editor }) => {
+      if (onUpdate) onUpdate(editor.getText());
+    },
+  });
+
+  if (!editor) {
+    return <p>Something went wrong while creating editor instance!</p>;
+  }
+
   return (
-    <EditorProvider extensions={extensions} content={content}>
-      <FloatingMenu editor={null}>This is the floating menu</FloatingMenu>
-      <BubbleMenu editor={null}>This is the bubble menu</BubbleMenu>
-    </EditorProvider>
+    <div className="flex flex-col gap-2">
+      {toolbar && <Toolbar editor={editor} />}
+      <div className="h-[90vh] overflow-y-scroll custom-scrollbar border rounded-lg">
+        <EditorContent editor={editor} className="p-4" />
+      </div>
+    </div>
   );
-};
-
-export default Tiptap;
+}

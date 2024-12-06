@@ -72,7 +72,7 @@ const FileTabList = ({
   onClose: (file_id: string) => void;
 }) => {
   return (
-    <div className="flex gap-1 p-2">
+    <div className="flex gap-1">
       {files.map((file) => (
         <FileTab
           key={file.file_id}
@@ -88,13 +88,13 @@ const FileTabList = ({
 
 const WorkSpace = () => {
   const [workspaceFiles, setWorkspaceFiles] = useAtom(WorkspaceFilesAtom);
-  const [activeFile, setActiveFile] = useAtom(ActiveFileAtom);
+  const [activeFile, setActiveFile] = useAtom<WorkspaceFile>(ActiveFileAtom);
   const [fileDirectoryState, setFileDirectoryState] = useState<{
     state: boolean;
     type: string;
   }>({
-    state: false,
-    type: "",
+    state: true,
+    type: "files",
   });
 
   const handleFileSelect = useCallback((file: WorkspaceFile) => {
@@ -112,12 +112,17 @@ const WorkSpace = () => {
       <ResizablePanelGroup direction="horizontal">
         <ResizablePanel>
           {workspaceFiles.length !== 0 && (
-            <FileTabList
-              files={workspaceFiles}
-              activeFileId={activeFile.file_id}
-              onSelect={handleFileSelect}
-              onClose={handleFileClose}
-            />
+            <div className="h-full flex flex-col gap-2 m-2">
+              <FileTabList
+                files={workspaceFiles}
+                activeFileId={activeFile.file_id}
+                onSelect={handleFileSelect}
+                onClose={handleFileClose}
+              />
+              {activeFile && (
+                <Tiptap content={activeFile.file_content} editable toolbar />
+              )}
+            </div>
           )}
         </ResizablePanel>
         {fileDirectoryState.state && (

@@ -10,6 +10,7 @@ import { FileSystemItem, Folder } from "./types";
 export const createFile = (name: string): FileSystemItem => ({
     id: uuidv4(),
     name,
+    content: '',
     type: 'file',
 });
 
@@ -99,6 +100,7 @@ export const transformStructure = (structure: WorkspaceDirectoryResponse): Folde
         ...structure.files.map((file): any => ({
             id: file.file_id,
             name: file.file_name,
+            content: file.file_content,
             type: "file",
         })),
         ...structure.sub_folders.map(transformStructure),
