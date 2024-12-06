@@ -1,6 +1,10 @@
 import { CreateFile, CreateFolder, CreateWorkspace } from "@/lib/interface";
 import axios, { AxiosResponse } from "axios"
 
+export const getWorkspaces = async (): Promise<AxiosResponse> => {
+    return axios.get(`/api/workspace`)
+}
+
 /**
  * Creates a new workspace.
  * @param data {@link CreateWorkspace}

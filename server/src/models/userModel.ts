@@ -2,7 +2,7 @@ import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/pgConnection";
 
 interface UserAttributes {
-    id: number;
+    id: string;
     name: string;
     email: string;
     pfp: string;
@@ -11,7 +11,7 @@ interface UserAttributes {
 interface UserCreationAttributes extends Optional<UserAttributes, 'id'> { }
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
-    public id!: number;
+    public id!: string;
     public name!: string;
     public email!: string;
     public pfp!: string;
@@ -19,9 +19,8 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
 
 User.init({
     id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
-        autoIncrement: true,
         primaryKey: true
     },
     name: {

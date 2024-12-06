@@ -2,7 +2,6 @@ import { useState, memo, useCallback } from "react";
 import { useAtom } from "jotai";
 
 import { ActiveFileAtom, WorkspaceFilesAtom } from "@/lib/atoms";
-import { WorkspaceFile } from "@/lib/interface";
 
 import {
   ResizableHandle,
@@ -14,6 +13,8 @@ import { File, X } from "lucide-react";
 import WorkSpacePanel from "@/components/WorkSpacePanel";
 import ReactFlowPanel from "@/components/ReactFlowPanel";
 import FileDirectoryPanel from "@/components/DirectoryPanel/FileDirectoryPanel";
+import { WorkspaceFile } from "@/lib/types";
+import Tiptap from "@/components/Editor/TipTap";
 
 const FileTab = memo(
   ({
@@ -130,6 +131,9 @@ const WorkSpace = () => {
         )}
       </ResizablePanelGroup>
 
+      {/**
+       * SidePanel to different workspace sections like directory, react-flow nodes etc
+       */}
       <WorkSpacePanel
         onToggle={(type: string) =>
           setFileDirectoryState({

@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 
 interface WorkspaceAttributes {
     workspace_id: string;
-    user_id: number;
+    user_id: string;
     workspace_name: string;
     workspace_description: string;
 }
@@ -13,7 +13,7 @@ interface WorkspaceCreationAttributes { }
 
 class Workspace extends Model<WorkspaceAttributes, WorkspaceCreationAttributes> implements WorkspaceAttributes {
     public workspace_id!: string;
-    public user_id!: number;
+    public user_id!: string;
     public workspace_name!: string;
     public workspace_description!: string;
 }
@@ -27,7 +27,7 @@ Workspace.init({
         unique: true
     },
     user_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
     },
     workspace_name: {

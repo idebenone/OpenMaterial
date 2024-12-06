@@ -1,33 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { useAtom, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useParams } from "react-router-dom";
 
-import { FileSystemItem, Folder } from "@/lib/interface";
-import {
-  addItem,
-  createFile,
-  createFolder,
-  deleteItem,
-  updateItemName,
-} from "@/lib/utils";
 import {
   ActiveFileAtom,
   WorkspaceDirectoryAtom,
   WorkspaceFilesAtom,
 } from "@/lib/atoms";
-import TreeView from "./TreeView";
+import {
+  addItem,
+  createFile,
+  createFolder,
+  deleteItem,
+  transformStructure,
+  updateFolder,
+  updateItemName,
+} from "@/lib/file-utility";
+import { FileSystemItem, Folder } from "@/lib/types";
+
 import {
   createFileInWorkspace,
   createFolderInWorkspace,
   fetchWorkspaceDirectory,
 } from "@/api/workspace";
 
+import TreeView from "./TreeView";
+
 const FileDirectory = () => {
   const { id } = useParams();
-
-  // const structure = useAtomValue(WorkspaceDirectoryAtom);
+  const fileStructureAtom = useAtomValue(WorkspaceDirectoryAtom);
   const setActiveFile = useSetAtom(ActiveFileAtom);
   const [_, setWorkspaceFiles] = useAtom(WorkspaceFilesAtom);
+
   const [fileStructure, setFileStructure] = useState<Folder | null>(null);
 
   /**
@@ -37,7 +41,8 @@ const FileDirectory = () => {
   const handleFetchDirectory = async (workspace_id: string) => {
     try {
       const structure = await fetchWorkspaceDirectory(workspace_id);
-      setFileStructure(structure.data.DATA);
+      const transformedStructure = transformStructure(structure.data.DATA);
+      setFileStructure(transformedStructure || null);
     } catch (error) {
       console.log(error);
     }
@@ -52,19 +57,17 @@ const FileDirectory = () => {
     try {
       if (fileStructure) {
         const newFile = createFile(file_name);
-        const response = await createFileInWorkspace({
+        await createFileInWorkspace({
           file_name,
           folder_id: fileStructure.id,
           workspace_id: id!,
         });
 
-        if (response.statusText.includes("200")) {
-          setFileStructure(
-            updateFolder(fileStructure, parent_id, (folder) =>
-              addItem(folder, newFile)
-            )
-          );
-        }
+        setFileStructure(
+          updateFolder(fileStructure, parent_id, (folder) =>
+            addItem(folder, newFile)
+          )
+        );
       }
     } catch (error) {
       console.log(error);
@@ -118,30 +121,15 @@ const FileDirectory = () => {
     }
   };
 
-  const handleUpdateItemName = (itemId: string, newName: string) => {
+  /**
+   * Update file/folder name from the directory.
+   * @param item_id
+   * @param new_name
+   */
+  const handleUpdateItemName = (item_id: string, new_name: string) => {
     if (fileStructure) {
-      setFileStructure(updateItemName(fileStructure, itemId, newName));
+      setFileStructure(updateItemName(fileStructure, item_id, new_name));
     }
-  };
-
-  const updateFolder = (
-    folder: Folder,
-    targetId: string,
-    updateFn: (folder: Folder) => Folder
-  ): Folder => {
-    if (folder.id === targetId) {
-      return updateFn(folder);
-    }
-
-    return {
-      ...folder,
-      children: folder.children.map((child) => {
-        if (child.type === "folder") {
-          return updateFolder(child as Folder, targetId, updateFn);
-        }
-        return child;
-      }),
-    };
   };
 
   const handleSetActiveFile = (
@@ -167,20 +155,27 @@ const FileDirectory = () => {
           key={item.id}
           item={item}
           parentId={parentId}
-          handleAddFile={handleCreateFile}
-          handleAddFolder={handleCreateFolder}
-          handleDeleteItem={handleDeleteItem}
-          handleUpdateItemName={handleUpdateItemName}
-          handleSetActiveFile={handleSetActiveFile}
+          onAddFile={handleCreateFile}
+          onAddFolder={handleCreateFolder}
+          onDeleteItem={handleDeleteItem}
+          onUpdateItemName={handleUpdateItemName}
+          onSetActiveFile={handleSetActiveFile}
           renderItems={renderItems}
         />
       ))}
     </div>
   );
 
+  /**
+   * Fetches file directory from the server whenever the page loads
+   */
   useEffect(() => {
     handleFetchDirectory(id!);
   }, []);
+
+  useEffect(() => {
+    setFileStructure(fileStructureAtom);
+  }, [fileStructureAtom]);
 
   if (!fileStructure) {
     return <div>Loading...</div>;
@@ -190,11 +185,11 @@ const FileDirectory = () => {
     <TreeView
       item={fileStructure}
       parentId={fileStructure.id}
-      handleAddFile={handleCreateFile}
-      handleAddFolder={handleCreateFolder}
-      handleDeleteItem={handleDeleteItem}
-      handleUpdateItemName={handleUpdateItemName}
-      handleSetActiveFile={handleSetActiveFile}
+      onAddFile={handleCreateFile}
+      onAddFolder={handleCreateFolder}
+      onDeleteItem={handleDeleteItem}
+      onUpdateItemName={handleUpdateItemName}
+      onSetActiveFile={handleSetActiveFile}
       renderItems={renderItems}
     />
   );

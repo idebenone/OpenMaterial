@@ -4,6 +4,17 @@ import { v4 as uuidv4 } from "uuid";
 import { File } from "../models/fileModel";
 import { Folder, FolderAttributes } from "../models/folderModel";
 import { RESPONSE } from "../utils/responses";
+import { Workspace } from "../models/workspaceModel";
+
+const getAllWorkspaces = async (req: Request, res: Response) => {
+    try {
+        const workspaces = await Workspace.findAll({ where: { user_id: "dummy" } });
+        return res.status(200).json(RESPONSE.OK("", workspaces));
+    } catch (error) {
+        console.error("Error creating workspace:", error);
+        return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
+    }
+}
 
 /**
  * Creates a workspace. 
@@ -12,14 +23,40 @@ import { RESPONSE } from "../utils/responses";
  * @returns 
  */
 const createWorkspace = async (req: Request, res: Response) => {
-    const { user_id, workspace_name, workspace_description } = req.body();
-    if (!user_id || !workspace_name || !workspace_description) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
+    const { user_id, workspace_name, workspace_description } = req.body;
+    const transaction = await Workspace.sequelize?.transaction();
+    try {
+        const newWorkspace = await Workspace.create(
+            { user_id, workspace_name, workspace_description },
+            { transaction }
+        );
+        const newFolder = await Folder.create(
+            {
+                folder_id: uuidv4(),
+                folder_name: workspace_name,
+                parent_id: null,
+                workspace_id: newWorkspace.workspace_id,
+            },
+            { transaction }
+        );
+        await File.create(
+            {
+                file_id: uuidv4(),
+                file_name: "Readme",
+                folder_id: newFolder.folder_id,
+                workspace_id: newWorkspace.workspace_id,
+            },
+            { transaction }
+        );
+        await transaction?.commit();
+        return res.status(201).json(RESPONSE.CREATED('', newWorkspace.workspace_id));
+    } catch (error) {
+        console.error("Error creating workspace:", error);
+        await transaction?.rollback();
+        return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
+    }
+};
 
-    /**
-     * Create a workspace and assign a folder with a file containing welcome text.
-     */
-
-}
 
 /**
  * Fetches entire file directory of a workspace.
@@ -67,7 +104,7 @@ const getFileDirectory = async (req: Request, res: Response) => {
             result.push(nestedFolder);
         }
 
-        return res.status(200).json(RESPONSE.OK("", result))
+        return res.status(200).json(RESPONSE.OK("", result[0]))
     } catch (error) {
         console.log(error)
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
@@ -84,7 +121,8 @@ const createFile = async (req: Request, res: Response) => {
     const { file_name, folder_id, workspace_id } = req.body;
     if (!file_name || !folder_id) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
-        await File.create({ file_id: uuidv4(), file_name, folder_id, workspace_id })
+        const newFile = await File.create({ file_id: uuidv4(), file_name, folder_id, workspace_id })
+        newFile.save();
         return res.status(201).json(RESPONSE.CREATED);
     } catch (error) {
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
@@ -101,7 +139,8 @@ const createFolder = async (req: Request, res: Response) => {
     const { folder_name, parent_id, workspace_id } = req.body;
     if (!folder_name || !workspace_id) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
-        await Folder.create({ folder_id: uuidv4(), folder_name, parent_id: parent_id ? parent_id : null, workspace_id })
+        const newFolder = await Folder.create({ folder_id: uuidv4(), folder_name, parent_id: parent_id ? parent_id : null, workspace_id })
+        newFolder.save();
         return res.status(201).json(RESPONSE.CREATED);
     } catch (error) {
         console.log(error)
@@ -134,4 +173,4 @@ const saveFileContent = async (req: Request, res: Response) => {
 
 }
 
-export { getFileDirectory, createFile, createFolder, saveFileContent };
+export { createFile, createFolder, createWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent };

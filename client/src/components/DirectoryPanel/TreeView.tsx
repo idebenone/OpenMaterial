@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { FileSystemItem, Folder } from "@/lib/interface";
+
+import { FileSystemItem, Folder } from "@/lib/types";
+
 import {
   LucideFile,
   LucideFolder,
@@ -14,11 +16,11 @@ import {
 interface TreeViewProps {
   item: FileSystemItem;
   parentId: string;
-  handleAddFile: (parentId: string, fileName: string) => void;
-  handleAddFolder: (parentId: string, folderName: string) => void;
-  handleDeleteItem: (parentId: string, itemId: string) => void;
-  handleUpdateItemName: (itemId: string, newName: string) => void;
-  handleSetActiveFile: (
+  onAddFile: (parentId: string, fileName: string) => void;
+  onAddFolder: (parentId: string, folderName: string) => void;
+  onDeleteItem: (parentId: string, itemId: string) => void;
+  onUpdateItemName: (itemId: string, newName: string) => void;
+  onSetActiveFile: (
     file_id: string,
     file_name: string,
     file_content: string
@@ -29,11 +31,11 @@ interface TreeViewProps {
 const TreeView: React.FC<TreeViewProps> = ({
   item,
   parentId,
-  handleAddFile,
-  handleAddFolder,
-  handleDeleteItem,
-  handleUpdateItemName,
-  handleSetActiveFile,
+  onAddFile,
+  onAddFolder,
+  onDeleteItem,
+  onUpdateItemName,
+  onSetActiveFile,
   renderItems,
 }) => {
   const [isOpen, setIsOpen] = useState<boolean>(true);
@@ -48,8 +50,8 @@ const TreeView: React.FC<TreeViewProps> = ({
 
   const handleNameSubmit = () => {
     !setNewName
-      ? handleUpdateItemName(item.id, "untitled")
-      : handleUpdateItemName(item.id, newName);
+      ? onUpdateItemName(item.id, "untitled")
+      : onUpdateItemName(item.id, newName);
     setIsEditing(false);
   };
 
@@ -58,7 +60,10 @@ const TreeView: React.FC<TreeViewProps> = ({
       <div className="flex justify-between items-center group hover:bg-muted px-2 py-1 rounded-md cursor-pointer">
         <div
           className="flex items-center gap-1"
-          onDoubleClick={() => setIsEditing(true)}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            setIsEditing(true);
+          }}
         >
           {item.type === "folder" && (
             <button onClick={toggleOpen}>
@@ -91,7 +96,7 @@ const TreeView: React.FC<TreeViewProps> = ({
               className="text-xs"
               onClick={() =>
                 item.type === "file" &&
-                handleSetActiveFile(item.id, item.name, "Hello")
+                onSetActiveFile(item.id, item.name, "Hello")
               }
             >
               {item.name}
@@ -104,18 +109,18 @@ const TreeView: React.FC<TreeViewProps> = ({
             <>
               <FilePlus
                 className="h-5 w-5 hover:bg-slate-300 p-1 rounded-md"
-                onClick={() => handleAddFile(item.id, "New File")}
+                onClick={() => onAddFile(item.id, "New File")}
               />
               <FolderPlus
                 className="h-5 w-5 hover:bg-slate-300 p-1 rounded-md"
-                onClick={() => handleAddFolder(item.id, "New Folder")}
+                onClick={() => onAddFolder(item.id, "New Folder")}
               />
             </>
           )}
           {item.id !== "root" && (
             <Trash
               className="h-5 w-5 hover:bg-slate-300 p-1 rounded-md"
-              onClick={() => handleDeleteItem(parentId, item.id)}
+              onClick={() => onDeleteItem(parentId, item.id)}
             />
           )}
 

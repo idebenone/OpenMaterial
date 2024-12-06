@@ -1,7 +1,21 @@
 import express, { Request, Response } from "express";
-import { createFile, createFolder, getFileDirectory, saveFileContent } from "../services/workspaceServices";
+import { createFile, createFolder, createWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent } from "../services/workspaceServices";
 
 const WORKSPACE = express();
+
+/**
+ * Get all existing workspaces for an user.
+ */
+WORKSPACE.get("/", async (req: Request, res: Response) => {
+    await getAllWorkspaces(req, res);
+})
+
+/**
+ * Create a new workspace.
+ */
+WORKSPACE.post("/", async (req: Request, res: Response) => {
+    await createWorkspace(req, res);
+})
 
 /**
  * Fetch file directory.
