@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { RESPONSE } from "src/utils/responses";
-import { verifyJWT } from "src/utils/token";
+import RESPONSE from "../utils/responses";
+import { verifyJWT } from "../utils/token";
 
-const TokenValidator = async (
+const TokenValidator = (
     req: Request,
     res: Response,
     next: NextFunction

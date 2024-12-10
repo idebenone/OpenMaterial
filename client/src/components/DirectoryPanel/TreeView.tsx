@@ -18,7 +18,7 @@ interface TreeViewProps {
   parentId: string;
   onAddFile: (parentId: string, fileName: string) => void;
   onAddFolder: (parentId: string, folderName: string) => void;
-  onDeleteItem: (parentId: string, itemId: string) => void;
+  onDeleteItem: (parentId: string, itemId: string, type: string) => void;
   onUpdateItemName: (itemId: string, newName: string) => void;
   onSetActiveFile: (
     file_id: string,
@@ -120,7 +120,7 @@ const TreeView: React.FC<TreeViewProps> = ({
           {item.id !== "root" && (
             <Trash
               className="h-5 w-5 hover:bg-slate-300 p-1 rounded-md"
-              onClick={() => onDeleteItem(parentId, item.id)}
+              onClick={() => onDeleteItem(parentId, item.id, item.type)}
             />
           )}
 

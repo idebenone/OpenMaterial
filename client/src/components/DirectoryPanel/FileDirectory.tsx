@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useParams } from "react-router-dom";
 
@@ -21,135 +21,173 @@ import { FileSystemItem, Folder } from "@/lib/types";
 import {
   createFileInWorkspace,
   createFolderInWorkspace,
+  deleteFileInWorkspace,
+  deleteFolderInWorkspace,
   fetchWorkspaceDirectory,
 } from "@/api/workspace";
 
 import TreeView from "./TreeView";
 
-const FileDirectory = () => {
-  const { id } = useParams();
+/**
+ * Custom hook to fetch and manage workspace file directory.
+ */
+const useWorkspaceDirectory = (workspaceId: string | undefined) => {
   const fileStructureAtom = useAtomValue(WorkspaceDirectoryAtom);
-  const setActiveFile = useSetAtom(ActiveFileAtom);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_, setWorkspaceFiles] = useAtom(WorkspaceFilesAtom);
-
   const [fileStructure, setFileStructure] = useState<Folder | null>(null);
 
-  /**
-   * Fetches directory of a workspace from server.
-   * @param workspaceId
-   */
-  const handleFetchDirectory = async (workspace_id: string) => {
+  const fetchDirectory = useCallback(async () => {
+    if (!workspaceId) return;
     try {
-      const structure = await fetchWorkspaceDirectory(workspace_id);
-      const transformedStructure = transformStructure(structure.data.DATA);
+      const response = await fetchWorkspaceDirectory(workspaceId);
+      const transformedStructure = transformStructure(response.data.DATA);
       setFileStructure(transformedStructure || null);
     } catch (error) {
-      console.log(error);
+      console.error("Failed to fetch directory:", error);
     }
-  };
+  }, [workspaceId]);
+
+  useEffect(() => {
+    fetchDirectory();
+  }, [fetchDirectory]);
+
+  useEffect(() => {
+    setFileStructure(fileStructureAtom);
+  }, [fileStructureAtom]);
+
+  return { fileStructure, setFileStructure, refreshDirectory: fetchDirectory };
+};
+
+/**
+ * FileDirectory Component
+ * Displays and manages a workspace's directory structure.
+ */
+export default function FileDirectory() {
+  const { id } = useParams<{ id: string }>();
+  const setActiveFile = useSetAtom(ActiveFileAtom);
+  const [, setWorkspaceFiles] = useAtom(WorkspaceFilesAtom);
+
+  const { fileStructure, setFileStructure } = useWorkspaceDirectory(id);
 
   /**
-   * Create file in the directory.
-   * @param parent_id
-   * @param file_name
+   * On interacting with FileSystem core functionalities, it should:
+   * 1) Update the server
+   * 2) Update the state of tree view
+   * 3) Update the workspace files
    */
-  const handleCreateFile = async (parent_id: string, file_name: string) => {
-    try {
-      if (fileStructure) {
-        const newFile = createFile(file_name);
+
+  const handleCreateFile = useCallback(
+    async (parentId: string, fileName: string) => {
+      if (!fileStructure) return;
+      try {
+        /**
+         * Creates a FileSystemItem of type 'file'
+         */
+        const newFile = createFile(fileName);
+        /**
+         * Update the server.
+         */
         await createFileInWorkspace({
-          file_name,
-          folder_id: fileStructure.id,
+          file_name: fileName,
+          folder_id: parentId,
           workspace_id: id!,
         });
-
+        /**
+         * Update the treeview state.
+         */
         setFileStructure(
-          updateFolder(fileStructure, parent_id, (folder) =>
+          updateFolder(fileStructure, parentId, (folder) =>
             addItem(folder, newFile)
           )
         );
+        /**
+         * Update the workspace files, if required.
+         */
+        handleSetActiveFile(newFile.id, newFile.name, "");
+      } catch (error) {
+        console.error("Error creating file:", error);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    },
+    [fileStructure, id, setFileStructure]
+  );
 
-  /**
-   * Create folder in the directory.
-   * @param parent_id
-   * @param folder_name
-   */
-  const handleCreateFolder = async (parent_id: string, folder_name: string) => {
-    try {
-      if (fileStructure) {
-        const newFolder = createFolder(folder_name);
+  const handleCreateFolder = useCallback(
+    async (parentId: string, folderName: string) => {
+      if (!fileStructure) return;
+      try {
+        const newFolder = createFolder(folderName);
         await createFolderInWorkspace({
           workspace_id: id!,
-          folder_name: folder_name,
-          parent_id,
+          folder_name: folderName,
+          parent_id: parentId,
         });
-
         setFileStructure(
-          updateFolder(fileStructure, parent_id, (folder) =>
+          updateFolder(fileStructure, parentId, (folder) =>
             addItem(folder, newFolder)
           )
         );
+      } catch (error) {
+        console.error("Error creating folder:", error);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    },
+    [fileStructure, id, setFileStructure]
+  );
 
-  /**
-   * Delete file/folder from the directory.
-   * @param parent_id
-   * @param item_id
-   */
-  const handleDeleteItem = async (parent_id: string, item_id: string) => {
-    try {
-      if (fileStructure) {
+  const handleDeleteItem = useCallback(
+    async (parentId: string, itemId: string, type: string) => {
+      if (!fileStructure) return;
+      try {
+        type === "file"
+          ? await deleteFileInWorkspace({
+              workspace_id: id!,
+              file_id: itemId,
+            })
+          : await deleteFolderInWorkspace({
+              workspace_id: id!,
+              folder_id: itemId,
+            });
         setFileStructure(
-          updateFolder(fileStructure, parent_id, (folder) =>
-            deleteItem(folder, item_id)
+          updateFolder(fileStructure, parentId, (folder) =>
+            deleteItem(folder, itemId)
           )
         );
+      } catch (error) {
+        console.error("Error deleting item:", error);
       }
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    },
+    [fileStructure, setFileStructure]
+  );
 
-  /**
-   * Update file/folder name from the directory.
-   * @param item_id
-   * @param new_name
-   */
-  const handleUpdateItemName = (item_id: string, new_name: string) => {
-    if (fileStructure) {
-      setFileStructure(updateItemName(fileStructure, item_id, new_name));
-    }
-  };
+  const handleUpdateItemName = useCallback(
+    (itemId: string, newName: string) => {
+      if (!fileStructure) return;
+      setFileStructure(updateItemName(fileStructure, itemId, newName));
+    },
+    [fileStructure, setFileStructure]
+  );
 
-  const handleSetActiveFile = (
-    file_id: string,
-    file_name: string,
-    file_content: string
-  ) => {
-    setActiveFile({ file_id, file_name, file_content });
-    setWorkspaceFiles((prev) => {
-      const index = prev.findIndex((node) => node.file_id === file_id);
-      if (index === -1) return [...prev, { file_id, file_name, file_content }];
-      return prev;
-    });
-  };
+  const handleSetActiveFile = useCallback(
+    (fileId: string, fileName: string, fileContent: string) => {
+      setActiveFile({
+        file_id: fileId,
+        file_name: fileName,
+        file_content: fileContent,
+      });
+      setWorkspaceFiles((prev) => {
+        const existingIndex = prev.findIndex((node) => node.file_id === fileId);
+        if (existingIndex === -1)
+          return [
+            ...prev,
+            { file_id: fileId, file_name: fileName, file_content: fileContent },
+          ];
+        return prev;
+      });
+    },
+    [setActiveFile, setWorkspaceFiles]
+  );
 
-  const renderItems = (
-    items: FileSystemItem[],
-    parentId: string
-  ): React.ReactNode => (
-    <div>
-      {items.map((item) => (
+  const renderItems = useCallback(
+    (items: FileSystemItem[], parentId: string) =>
+      items.map((item) => (
         <TreeView
           key={item.id}
           item={item}
@@ -161,20 +199,15 @@ const FileDirectory = () => {
           onSetActiveFile={handleSetActiveFile}
           renderItems={renderItems}
         />
-      ))}
-    </div>
+      )),
+    [
+      handleCreateFile,
+      handleCreateFolder,
+      handleDeleteItem,
+      handleUpdateItemName,
+      handleSetActiveFile,
+    ]
   );
-
-  /**
-   * Fetches file directory from the server whenever the page loads
-   */
-  useEffect(() => {
-    handleFetchDirectory(id!);
-  }, []);
-
-  useEffect(() => {
-    setFileStructure(fileStructureAtom);
-  }, [fileStructureAtom]);
 
   if (!fileStructure) {
     return <div>Loading...</div>;
@@ -192,6 +225,4 @@ const FileDirectory = () => {
       renderItems={renderItems}
     />
   );
-};
-
-export default FileDirectory;
+}

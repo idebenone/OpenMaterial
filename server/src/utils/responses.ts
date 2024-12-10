@@ -1,4 +1,4 @@
-export const RESPONSE = {
+const RESPONSE = {
     OK: (message?: string | string[] | any, data?: any | any[]) => {
         return {
             ERROR: false,
@@ -65,3 +65,5 @@ export const RESPONSE = {
         };
     },
 };
+
+export default RESPONSE;

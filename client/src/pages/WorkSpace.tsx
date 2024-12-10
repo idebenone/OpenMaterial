@@ -15,6 +15,9 @@ import ReactFlowPanel from "@/components/ReactFlowPanel";
 import FileDirectoryPanel from "@/components/DirectoryPanel/FileDirectoryPanel";
 import { WorkspaceFile } from "@/lib/types";
 import Tiptap from "@/components/Editor/TipTap";
+import { toast } from "sonner";
+import { saveFileContent } from "@/api/workspace";
+import { useParams } from "react-router-dom";
 
 const FileTab = memo(
   ({
@@ -31,11 +34,7 @@ const FileTab = memo(
     return (
       <span
         className={`flex justify-between items-center p-1 cursor-pointer rounded-md border
-          ${
-            isActive
-              ? "min-w-32 bg-muted"
-              : "hover:bg-muted group transition-all duration-300 ease-in-out"
-          }
+          ${isActive ? "min-w-32 bg-muted" : "hover:bg-muted group"}
           ${isActive ? "" : "w-7 hover:w-32"}`}
         onClick={isActive ? undefined : onSelect}
       >
@@ -86,7 +85,8 @@ const FileTabList = ({
   );
 };
 
-const WorkSpace = () => {
+export default function WorkSpace() {
+  const { id } = useParams<{ id: string }>();
   const [workspaceFiles, setWorkspaceFiles] = useAtom(WorkspaceFilesAtom);
   const [activeFile, setActiveFile] = useAtom<WorkspaceFile>(ActiveFileAtom);
   const [fileDirectoryState, setFileDirectoryState] = useState<{
@@ -107,6 +107,19 @@ const WorkSpace = () => {
     );
   }, []);
 
+  const handleSaveFileContent = async () => {
+    try {
+      await saveFileContent({
+        workspace_id: id!,
+        file_id: activeFile.file_id,
+        file_content: activeFile.file_content,
+      });
+      toast.success("Saved successfully!");
+    } catch (error) {
+      toast.error("Something went wrong while saving. Sorrry!");
+    }
+  };
+
   return (
     <div className="h-full flex">
       <ResizablePanelGroup direction="horizontal">
@@ -120,7 +133,19 @@ const WorkSpace = () => {
                 onClose={handleFileClose}
               />
               {activeFile && (
-                <Tiptap content={activeFile.file_content} editable toolbar />
+                <Tiptap
+                  key={activeFile.file_id}
+                  content={activeFile.file_content}
+                  editable
+                  toolbar
+                  onUpdate={(data) =>
+                    setActiveFile((prev) => ({
+                      ...prev,
+                      file_content: data,
+                    }))
+                  }
+                  onSave={handleSaveFileContent}
+                />
               )}
             </div>
           )}
@@ -152,6 +177,4 @@ const WorkSpace = () => {
       />
     </div>
   );
-};
-
-export default WorkSpace;
+}

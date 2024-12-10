@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { Composition } from "../models/compositionModel";
 
-import { RESPONSE } from "../utils/responses";
+import RESPONSE from "../utils/responses";
 
 const getCompositions = async (req: Request, res: Response) => {
     try {

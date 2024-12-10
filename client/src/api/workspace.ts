@@ -32,8 +32,8 @@ export const deleteWorkspace = async (workspace_id: string): Promise<AxiosRespon
  * @param id - string 
  * @returns 
  */
-export const fetchWorkspaceDirectory = async (id: string): Promise<AxiosResponse> => {
-    return axios.get(`/api/workspace/${id}`);
+export const fetchWorkspaceDirectory = async (workspace_id: string): Promise<AxiosResponse> => {
+    return axios.get(`/api/workspace/${workspace_id}`);
 }
 
 /**
@@ -42,7 +42,7 @@ export const fetchWorkspaceDirectory = async (id: string): Promise<AxiosResponse
  * @returns 
  */
 export const createFolderInWorkspace = async (data: CreateFolder): Promise<AxiosResponse> => {
-    return axios.post(`/api/workspace/folder`, data);
+    return axios.post(`/api/workspace/${data.workspace_id}/folder`, data);
 }
 
 /**
@@ -51,7 +51,7 @@ export const createFolderInWorkspace = async (data: CreateFolder): Promise<Axios
  * @returns 
  */
 export const createFileInWorkspace = async (data: CreateFile): Promise<AxiosResponse> => {
-    return axios.post(`/api/workspace/file`, data)
+    return axios.post(`/api/workspace/${data.workspace_id}/file`, data)
 }
 
 /**
@@ -59,12 +59,26 @@ export const createFileInWorkspace = async (data: CreateFile): Promise<AxiosResp
  * @param data 
  * @returns 
  */
-export const saveFileContent = async (data: { file_id: string, file_content: string }) => {
-    return axios.post(`/api/workspacefile/data`, data)
+export const saveFileContent = async (data: { workspace_id: string, file_id: string, file_content: string }): Promise<AxiosResponse> => {
+    return axios.post(`/api/workspace/${data.workspace_id}/file/data`, data)
 }
 
-export const deleteItemInWorkspace = async () => {
+/**
+ * Deletes a folder from workspace.
+ * @param data 
+ * @returns 
+ */
+export const deleteFolderInWorkspace = async (data: { workspace_id: string, folder_id: string }): Promise<AxiosResponse> => {
+    return axios.delete(`/api/workspace/${data.workspace_id}/folder/${data.folder_id}`)
+}
 
+/**
+ * Deletes a file from workspace.
+ * @param data 
+ * @returns 
+ */
+export const deleteFileInWorkspace = async (data: { workspace_id: string, file_id: string }): Promise<AxiosResponse> => {
+    return axios.delete(`/api/workspace/${data.workspace_id}/file/${data.file_id}`)
 }
 
 export const renameFileFolder = async () => {

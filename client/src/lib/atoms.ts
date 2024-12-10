@@ -1,6 +1,6 @@
-import { atom } from "jotai";
 import { atomWithStorage } from 'jotai/utils'
-import { Folder, WorkspaceFile } from "./interface";
+import { Folder, WorkspaceFile } from "./types";
+import { atom } from 'jotai';
 
 /**
  * File that is currently active in workspace.

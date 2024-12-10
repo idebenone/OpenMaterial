@@ -147,19 +147,22 @@ export default function Home() {
               <X className="h-4 w-4" />
             </span>
           </Button>
-          <Button disabled={!name && loading} onClick={handleCreateWorkspace}>
-            {loading ? (
-              <span className="flex justify-center items-center gap-2">
-                <p>Creating</p>
-                <Spinner />
-              </span>
-            ) : (
-              <span className="flex justify-center items-center gap-2">
-                <p>I'm ready!</p>
-                <Check className="h-4 w-4" />
-              </span>
-            )}
-          </Button>
+
+          {!name && (
+            <Button disabled={!loading} onClick={handleCreateWorkspace}>
+              {loading ? (
+                <span className="flex justify-center items-center gap-2">
+                  <p>Creating</p>
+                  <Spinner />
+                </span>
+              ) : (
+                <span className="flex justify-center items-center gap-2">
+                  <p>I'm ready!</p>
+                  <Check className="h-4 w-4" />
+                </span>
+              )}
+            </Button>
+          )}
         </div>
       </div>
     </div>

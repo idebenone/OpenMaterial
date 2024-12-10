@@ -1,9 +1,9 @@
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import { v4 as uuidv4 } from "uuid";
 
 import { File } from "../models/fileModel";
 import { Folder, FolderAttributes } from "../models/folderModel";
-import { RESPONSE } from "../utils/responses";
+import RESPONSE from "../utils/responses";
 import { Workspace } from "../models/workspaceModel";
 
 /**
@@ -71,14 +71,10 @@ const createWorkspace = async (req: Request, res: Response) => {
  * @returns 
  */
 const deleteWorkspace = async (req: Request, res: Response) => {
-    const workspace_id = req.params.id;
     const transaction = await Workspace.sequelize?.transaction();
     try {
-        if (!workspace_id) {
-            return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
-        }
         const folders = await Folder.findAll({
-            where: { workspace_id },
+            where: { workspace_id: res.locals.workspace_id },
             transaction,
         });
         const folderIds = folders.map(folder => folder.folder_id);
@@ -87,11 +83,11 @@ const deleteWorkspace = async (req: Request, res: Response) => {
             transaction,
         });
         await Folder.destroy({
-            where: { workspace_id },
+            where: { workspace_id: res.locals.workspace_id },
             transaction,
         });
         await Workspace.destroy({
-            where: { workspace_id },
+            where: { workspace_id: res.locals.workspace_id },
             transaction,
         });
         await transaction?.commit();
@@ -110,8 +106,6 @@ const deleteWorkspace = async (req: Request, res: Response) => {
  * @returns 
  */
 const getFileDirectory = async (req: Request, res: Response) => {
-    const workspace_id = req.params.id
-    if (!workspace_id) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
         const getFolderRecursive = async (folderId: string) => {
             const folder = await Folder.findByPk(folderId, {
@@ -136,7 +130,7 @@ const getFileDirectory = async (req: Request, res: Response) => {
         };
 
         const rootFolders = await Folder.findAll({
-            where: { workspace_id, parent_id: null },
+            where: { workspace_id: res.locals.workspace_id, parent_id: null },
             include: [
                 { model: File, as: 'files' },
                 { model: Folder, as: 'sub_folders', include: ['files', 'sub_folders'] }
@@ -163,10 +157,10 @@ const getFileDirectory = async (req: Request, res: Response) => {
  * @returns 
  */
 const createFile = async (req: Request, res: Response) => {
-    const { file_name, folder_id, workspace_id } = req.body;
+    const { file_name, folder_id } = req.body;
     if (!file_name || !folder_id) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
-        const newFile = await File.create({ file_id: uuidv4(), file_name, folder_id, workspace_id })
+        const newFile = await File.create({ file_id: uuidv4(), file_name, folder_id, workspace_id: res.locals.workspace_id })
         newFile.save();
         return res.status(201).json(RESPONSE.CREATED);
     } catch (error) {
@@ -181,12 +175,76 @@ const createFile = async (req: Request, res: Response) => {
  * @returns 
  */
 const createFolder = async (req: Request, res: Response) => {
-    const { folder_name, parent_id, workspace_id } = req.body;
-    if (!folder_name || !workspace_id) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
+    const { folder_name, parent_id } = req.body;
+    if (!folder_name) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
-        const newFolder = await Folder.create({ folder_id: uuidv4(), folder_name, parent_id: parent_id ? parent_id : null, workspace_id })
+        const newFolder = await Folder.create({ folder_id: uuidv4(), folder_name, parent_id: parent_id ? parent_id : null, workspace_id: res.locals.workspace_id })
         newFolder.save();
         return res.status(201).json(RESPONSE.CREATED);
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
+    }
+}
+
+/**
+ * Deletes a folder and children.
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const deleteFolder = async (req: Request, res: Response) => {
+    const folder_id = req.params.folder_id;
+    if (!folder_id) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
+
+    const transaction = await Folder.sequelize?.transaction();
+    try {
+        const folders = await Folder.findAll({
+            where: {
+                folder_id, workspace_id: res.locals.workspace_id
+            },
+            transaction,
+        });
+        const folderIds = folders.map(folder => folder.folder_id)
+        if (folderIds.length !== 0) {
+            await File.destroy({
+                where: {
+                    folder_id: folderIds,
+                    workspace_id: res.locals.workspace_id
+                },
+                transaction,
+            });
+        }
+        await Folder.destroy({
+            where: {
+                folder_id, workspace_id: res.locals.workspace_id
+            }
+        })
+        return res.status(204).json(RESPONSE.NO_CONTENT);
+    } catch (error) {
+        console.log(error)
+        await transaction?.rollback();
+        return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
+    }
+}
+
+/**
+ * Deletes a file.
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const deleteFile = async (req: Request, res: Response) => {
+    const file_id = req.params.file_id;
+    if (!file_id) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
+    try {
+        await File.destroy({
+            where: {
+                file_id: file_id,
+                workspace_id: res.locals.workspace_id
+            }
+        })
+        return res.status(204).json(RESPONSE.NO_CONTENT);
     } catch (error) {
         console.log(error)
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
@@ -207,10 +265,12 @@ const saveFileContent = async (req: Request, res: Response) => {
             { file_content },
             {
                 where: {
-                    $file_id$: file_id
+                    $file_id$: file_id,
+                    workspace_id: res.locals.workspace_id
                 }
             }
         )
+        return res.status(200).json(RESPONSE.OK);
     } catch (error) {
         console.log(error);
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
@@ -218,4 +278,14 @@ const saveFileContent = async (req: Request, res: Response) => {
 
 }
 
-export { createFile, createFolder, createWorkspace, deleteWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent };
+export {
+    createFile,
+    createFolder,
+    createWorkspace,
+    deleteFile,
+    deleteFolder,
+    deleteWorkspace,
+    getAllWorkspaces,
+    getFileDirectory,
+    saveFileContent
+};

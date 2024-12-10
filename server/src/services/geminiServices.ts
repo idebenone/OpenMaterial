@@ -4,7 +4,7 @@ dotenv.config();
 import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
-import { RESPONSE } from "../utils/responses";
+import RESPONSE from "../utils/responses";
 import { appendFields } from "../utils/chartUtils";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
