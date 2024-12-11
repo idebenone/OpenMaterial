@@ -3,8 +3,9 @@ import { v4 as uuidv4 } from "uuid";
 
 import { File } from "../models/fileModel";
 import { Folder, FolderAttributes } from "../models/folderModel";
-import RESPONSE from "../utils/responses";
 import { Workspace } from "../models/workspaceModel";
+
+import RESPONSE from "../utils/responses";
 
 /**
  * Get all workspaces for an user.

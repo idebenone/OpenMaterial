@@ -8,11 +8,28 @@ import { store } from "./redux/store";
 import WorkSpace from "./pages/WorkSpace";
 import Home from "./pages/Home";
 import { Toaster } from "@/components/ui/sonner";
+import Landing from "./pages/Landing";
+import Shared from "./pages/Shared";
+import Explore from "./pages/Explore";
 
 const router = createBrowserRouter([
   {
     path: "",
-    element: <Home />,
+    element: <Shared />,
+    children: [
+      {
+        path: "",
+        element: <Landing />,
+      },
+      {
+        path: "home",
+        element: <Home />,
+      },
+      {
+        path: "explore",
+        element: <Explore />,
+      },
+    ],
   },
   {
     path: "workspace/:id",
