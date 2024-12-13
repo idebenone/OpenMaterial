@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Landing from "./pages/Landing";
 import Shared from "./pages/Shared";
 import Explore from "./pages/Explore";
+import Material from "./pages/Material";
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
       {
         path: "explore",
         element: <Explore />,
+      },
+      {
+        path: "material/:id",
+        element: <Material />,
       },
     ],
   },

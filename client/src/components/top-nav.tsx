@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { Link } from "react-router-dom";
+import AuthButtons from "./auth-buttons";
 
 export default function TopNav() {
   return (
@@ -16,6 +17,8 @@ export default function TopNav() {
           <Link to="/explore">Explore</Link>
           <Link to="/home">Home</Link>
         </div>
+
+        <AuthButtons />
       </div>
     </div>
   );
