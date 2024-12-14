@@ -22,6 +22,13 @@ const RESPONSE = {
             MESSAGE: message ? message : "NO CONTENT",
         };
     },
+    BAD_REQUEST: (message?: string | string[]) => {
+        return {
+            ERROR: false,
+            STATUS: 400,
+            MESSAGE: message ? message : "BAD REQUEST",
+        }
+    },
     UN_AUTHORIZED: (message?: string | string[]) => {
         return {
             ERROR: true,

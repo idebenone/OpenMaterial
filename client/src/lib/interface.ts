@@ -1,13 +1,7 @@
-export interface CreateComposition {
-    composition_name: string;
-    composition_description: string
-}
-
 /**
  * Interface to create a workspace.
  */
 export interface CreateWorkspace {
-    user_id: string;
     workspace_name: string;
     workspace_description: string;
 }

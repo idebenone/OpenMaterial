@@ -1,5 +1,8 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/pgConnection";
+import { Token } from "./tokenModel";
+import { randomUUID } from "crypto";
+import { Session } from "./sessionModel";
 
 interface UserAttributes {
     id: string;
@@ -15,13 +18,18 @@ class User extends Model<UserAttributes, UserCreationAttributes> implements User
     public name!: string;
     public email!: string;
     public pfp!: string;
+
+    public token!: Token[];
+    public session!: Session;
 }
 
 User.init({
     id: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false,
-        primaryKey: true
+        defaultValue: () => randomUUID(),
+        primaryKey: true,
+        unique: true
     },
     name: {
         type: DataTypes.STRING,
@@ -34,13 +42,25 @@ User.init({
     },
     pfp: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: true
     }
 }, {
     sequelize,
     modelName: 'User',
     tableName: 'User',
     timestamps: true
+})
+
+User.hasMany(Token, {
+    sourceKey: 'id',
+    foreignKey: 'user_id',
+    as: 'token'
+});
+
+User.hasOne(Session, {
+    sourceKey: 'id',
+    foreignKey: 'user_id',
+    as: 'session'
 })
 
 export { User, UserAttributes, UserCreationAttributes };

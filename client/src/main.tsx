@@ -10,8 +10,8 @@ import Home from "./pages/Home";
 import { Toaster } from "@/components/ui/sonner";
 import Landing from "./pages/Landing";
 import Shared from "./pages/Shared";
-import Explore from "./pages/Explore";
 import Material from "./pages/Material";
+import AuthCallback from "./pages/callback/auth";
 
 const router = createBrowserRouter([
   {
@@ -27,14 +27,14 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "explore",
-        element: <Explore />,
-      },
-      {
         path: "material/:id",
         element: <Material />,
       },
     ],
+  },
+  {
+    path: "callback/auth",
+    element: <AuthCallback />,
   },
   {
     path: "workspace/:id",

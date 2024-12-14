@@ -13,12 +13,10 @@ export default function TopNav() {
           </span>
         </Link>
 
-        <div className="flex gap-4">
-          <Link to="/explore">Explore</Link>
+        <div className="flex items-center gap-4">
           <Link to="/home">Home</Link>
+          <AuthButtons />
         </div>
-
-        <AuthButtons />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import express, { Express } from 'express';
 import morgan from "morgan";
 import sequelize from './config/pgConnection';
 import cors from "cors";
+import AUTH from "./routes/authRoutes";
 import GEMINI from './routes/geminiRoutes';
 import COMPOSITION from "./routes/compositionRoutes";
 import WORKSPACE from "./routes/workspaceRoutes";
@@ -22,6 +23,7 @@ sequelize.sync().then(() => {
     })
 }).catch((error) => console.log("Something went wrong \n", error))
 
+app.use("/api/auth", AUTH);
 app.use("/api/composition", COMPOSITION);
 app.use("/api/gemini", GEMINI)
 app.use("/api/workspace", WORKSPACE)

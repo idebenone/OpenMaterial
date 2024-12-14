@@ -18,36 +18,54 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { createComposition } from "@/api/compositions";
+
+import { createWorkspace } from "@/api/workspace";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import Spinner from "../ui/spinner";
+import { Check } from "lucide-react";
 
 const formSchema = z.object({
-  composition_name: z.string(),
-  composition_description: z.string(),
+  workspace_name: z.string(),
+  workspace_description: z.string(),
 });
 
-interface CreateCompositionProps {
+interface CreateWorkspaceProps {
   dialogState: boolean;
   onCloseDialog: () => void;
 }
 
-const CreateComposition: React.FC<CreateCompositionProps> = ({
+const CreateWorkspace: React.FC<CreateWorkspaceProps> = ({
   dialogState,
   onCloseDialog,
 }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState<boolean>(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      composition_name: "",
-      composition_description: "",
+      workspace_name: "",
+      workspace_description: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await createComposition(values);
-      onCloseDialog();
+      setLoading(true);
+      const response = await createWorkspace(values);
+
+      if (response.data.DATA) {
+        navigate(`/workspace/${response.data.DATA}`);
+        toast.success("Workspace has been created successfully");
+      } else {
+        toast.success("Something went wrong!");
+      }
     } catch (error) {
-      console.log(error);
+      toast.error("Couldn't create a workspace. Sorry!");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -66,7 +84,7 @@ const CreateComposition: React.FC<CreateCompositionProps> = ({
             >
               <FormField
                 control={form.control}
-                name="composition_name"
+                name="workspace_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -78,7 +96,7 @@ const CreateComposition: React.FC<CreateCompositionProps> = ({
               />
               <FormField
                 control={form.control}
-                name="composition_description"
+                name="workspace_description"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
@@ -88,7 +106,21 @@ const CreateComposition: React.FC<CreateCompositionProps> = ({
                   </FormItem>
                 )}
               />
-              <Button type="submit">Start</Button>
+              {
+                <Button disabled={!loading}>
+                  {loading ? (
+                    <span className="flex justify-center items-center gap-2">
+                      <p>Creating</p>
+                      <Spinner />
+                    </span>
+                  ) : (
+                    <span className="flex justify-center items-center gap-2">
+                      <p>I'm ready!</p>
+                      <Check className="h-4 w-4" />
+                    </span>
+                  )}
+                </Button>
+              }
             </form>
           </Form>
         </DialogHeader>
@@ -97,4 +129,4 @@ const CreateComposition: React.FC<CreateCompositionProps> = ({
   );
 };
 
-export default CreateComposition;
+export default CreateWorkspace;

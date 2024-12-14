@@ -1,8 +1,12 @@
 import jwt from "jsonwebtoken";
 
-export const generateJWT = (user_id: number | string): string => {
+export const generateJWT = (payload: {
+    user_id: string,
+    email: string,
+    pfp: string
+}): string => {
     const token = jwt.sign(
-        { user_id, time: new Date().getTime() },
+        { payload, time: new Date().getTime() },
         "secret auth",
         { expiresIn: '1d' }
     )

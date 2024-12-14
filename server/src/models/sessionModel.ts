@@ -1,10 +1,11 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/pgConnection";
 import { randomUUID } from "crypto";
+import { User } from "./userModel";
 
 interface SessionAttributes {
     session_id: string;
-    user: string;
+    user_id: string;
     device: string;
     location: string;
     ip: string;
@@ -14,7 +15,7 @@ interface SessionCreationAttributes { };
 
 class Session extends Model<SessionAttributes, SessionCreationAttributes> implements SessionAttributes {
     public session_id!: string;
-    public user!: string;
+    public user_id!: string;
     public device!: string;
     public location!: string;
     public ip!: string;
@@ -28,27 +29,33 @@ Session.init({
         primaryKey: true,
         unique: true,
     },
-    user: {
+    user_id: {
         type: DataTypes.STRING,
         allowNull: false,
     },
     device: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     ip: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     },
     location: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
     }
 }, {
     sequelize,
     modelName: 'Session',
     tableName: 'Session',
     timestamps: true,
+})
+
+Session.belongsTo(User, {
+    targetKey: 'id',
+    foreignKey: 'user_id',
+    as: 'user'
 })
 
 export { Session, SessionAttributes, SessionCreationAttributes }
