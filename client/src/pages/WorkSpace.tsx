@@ -11,7 +11,7 @@ import {
 import { File, X } from "lucide-react";
 
 import WorkSpacePanel from "@/components/WorkSpacePanel";
-import ReactFlowPanel from "@/components/ReactFlowPanel";
+// import ReactFlowPanel from "@/components/ReactFlowPanel";
 import FileDirectoryPanel from "@/components/DirectoryPanel/FileDirectoryPanel";
 import { WorkspaceFile } from "@/lib/types";
 import Tiptap from "@/components/Editor/TipTap";
@@ -155,7 +155,7 @@ export default function WorkSpace() {
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={20} minSize={15} maxSize={50}>
               {fileDirectoryState.type == "files" && <FileDirectoryPanel />}
-              {fileDirectoryState.type == "nodes" && <ReactFlowPanel />}
+              {/* {fileDirectoryState.type == "nodes" && <ReactFlowPanel />} */}
             </ResizablePanel>
           </>
         )}

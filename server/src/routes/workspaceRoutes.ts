@@ -1,8 +1,10 @@
 import express, { Request, Response } from "express";
 import { createFile, createFolder, createWorkspace, deleteFile, deleteFolder, deleteWorkspace, getAllWorkspaces, getFileDirectory, saveFileContent } from "../services/workspaceServices";
 import GetWorkspaceID from "../middlewares/workspaceResolver";
+import TokenValidator from "../middlewares/tokenValidator";
 
 const WORKSPACE = express();
+WORKSPACE.use(TokenValidator)
 
 /**
  * Get all existing workspaces for an user.

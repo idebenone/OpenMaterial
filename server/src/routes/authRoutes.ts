@@ -6,7 +6,7 @@ const AUTH = express();
 /**
  * Authenticates user through GitHub flow.
  */
-AUTH.get("/github", async (req: Request, res: Response) => {
+AUTH.get("/github/:code", async (req: Request, res: Response) => {
     await authentication_GITHUB(req, res);
 })
 

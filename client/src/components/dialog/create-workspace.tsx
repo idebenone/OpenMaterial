@@ -73,10 +73,8 @@ const CreateWorkspace: React.FC<CreateWorkspaceProps> = ({
     <Dialog open={dialogState} onOpenChange={onCloseDialog}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Ready to compose?</DialogTitle>
-          <DialogDescription>
-            A composition could be anything!
-          </DialogDescription>
+          <DialogTitle>Let's create a workspace?</DialogTitle>
+          <DialogDescription>It could be anything!</DialogDescription>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
@@ -107,7 +105,7 @@ const CreateWorkspace: React.FC<CreateWorkspaceProps> = ({
                 )}
               />
               {
-                <Button disabled={!loading}>
+                <Button disabled={loading}>
                   {loading ? (
                     <span className="flex justify-center items-center gap-2">
                       <p>Creating</p>

@@ -1,10 +1,10 @@
-export function localSync(type: string, data: any) {
-    localStorage.setItem(type, JSON.stringify(data));
+export function localSync(type: string, data: string | object) {
+    localStorage.setItem(type, typeof (data) === "object" ? JSON.stringify(data) : data);
 }
 
-export function localFetch(type: string): { [key: string]: unknown }[] {
+export function localFetch(type: string): string | { [key: string]: unknown }[] {
     const data = localStorage.getItem(type);
-    return data ? JSON.parse(data) : [];
+    return data ? typeof (data) === 'string' ? data : JSON.parse(data) : [];
 }
 
 export function localFlush() {

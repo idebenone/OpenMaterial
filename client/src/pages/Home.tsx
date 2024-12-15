@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import CreateWorkspace from "@/components/dialog/create-workspace";
 
 export default function Home() {
   const navigate = useNavigate();
 
+  const [dialogState, setDialogState] = useState<boolean>(false);
   const [workspaces, setWorkspaces] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -51,17 +53,21 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col h-full w-full justify-center items-center">
+    <div className="flex flex-col h-full w-full items-center">
       <div className="w-1/3 flex gap-2">
         {loading ? (
-          <Skeleton className="w-full h-[20px] rounded-full" />
+          <>
+            <Skeleton className="w-full h-[100px] rounded-lg" />
+            <Skeleton className="w-full h-[100px] rounded-lg" />
+            <Skeleton className="w-full h-[100px] rounded-lg" />
+          </>
         ) : (
           <>
             {workspaces.length !== 0 ? (
               workspaces.map((workspace) => (
                 <div
                   key={workspace.workspace_id}
-                  className="relative rounded-lg p-4 w-full border cursor-pointer hover:bg-muted group"
+                  className="relative rounded-lg p-4 w-full border cursor-pointer hover:bg-muted group h-[100px]"
                   onClick={() =>
                     navigate(`/workspace/${workspace.workspace_id}`)
                   }
@@ -98,13 +104,24 @@ export default function Home() {
                 </div>
               ))
             ) : (
-              <p className="text-center text-muted-foreground w-full">
-                No workspaces? Lets create one!
-              </p>
+              <div className="flex gap-2 justify-center text-muted-foreground w-full">
+                <p className="">No workspaces? Lets</p>
+                <p
+                  className="underline cursor-pointer"
+                  onClick={() => setDialogState(!dialogState)}
+                >
+                  create one!
+                </p>
+              </div>
             )}
           </>
         )}
       </div>
+
+      <CreateWorkspace
+        dialogState={dialogState}
+        onCloseDialog={() => setDialogState(!dialogState)}
+      />
     </div>
   );
 }

@@ -6,7 +6,7 @@ export const generateJWT = (payload: {
     pfp: string
 }): string => {
     const token = jwt.sign(
-        { payload, time: new Date().getTime() },
+        { ...payload, time: new Date().getTime() },
         "secret auth",
         { expiresIn: '1d' }
     )

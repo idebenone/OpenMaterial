@@ -1,12 +1,13 @@
+import { AxiosResponse } from "axios"
+import axiosInstance from "@/lib/interceptor";
 import { CreateFile, CreateFolder, CreateWorkspace } from "@/lib/interface";
-import axios, { AxiosResponse } from "axios"
 
 /**
  * Get all existing workspaces.
  * @returns 
  */
 export const getWorkspaces = async (): Promise<AxiosResponse> => {
-    return axios.get(`/api/workspace`)
+    return axiosInstance.get(`/workspace`)
 }
 
 /**
@@ -15,7 +16,7 @@ export const getWorkspaces = async (): Promise<AxiosResponse> => {
  * @returns 
  */
 export const createWorkspace = async (data: CreateWorkspace): Promise<AxiosResponse> => {
-    return axios.post(`/api/workspace`, data);
+    return axiosInstance.post(`/workspace`, data);
 }
 
 /**
@@ -24,7 +25,7 @@ export const createWorkspace = async (data: CreateWorkspace): Promise<AxiosRespo
  * @returns 
  */
 export const deleteWorkspace = async (workspace_id: string): Promise<AxiosResponse> => {
-    return axios.delete(`/api/workspace/${workspace_id}`);
+    return axiosInstance.delete(`/workspace/${workspace_id}`);
 }
 
 /**
@@ -33,7 +34,7 @@ export const deleteWorkspace = async (workspace_id: string): Promise<AxiosRespon
  * @returns 
  */
 export const fetchWorkspaceDirectory = async (workspace_id: string): Promise<AxiosResponse> => {
-    return axios.get(`/api/workspace/${workspace_id}`);
+    return axiosInstance.get(`/workspace/${workspace_id}`);
 }
 
 /**
@@ -42,7 +43,7 @@ export const fetchWorkspaceDirectory = async (workspace_id: string): Promise<Axi
  * @returns 
  */
 export const createFolderInWorkspace = async (data: CreateFolder): Promise<AxiosResponse> => {
-    return axios.post(`/api/workspace/${data.workspace_id}/folder`, data);
+    return axiosInstance.post(`/workspace/${data.workspace_id}/folder`, data);
 }
 
 /**
@@ -51,7 +52,7 @@ export const createFolderInWorkspace = async (data: CreateFolder): Promise<Axios
  * @returns 
  */
 export const createFileInWorkspace = async (data: CreateFile): Promise<AxiosResponse> => {
-    return axios.post(`/api/workspace/${data.workspace_id}/file`, data)
+    return axiosInstance.post(`/workspace/${data.workspace_id}/file`, data)
 }
 
 /**
@@ -60,7 +61,7 @@ export const createFileInWorkspace = async (data: CreateFile): Promise<AxiosResp
  * @returns 
  */
 export const saveFileContent = async (data: { workspace_id: string, file_id: string, file_content: string }): Promise<AxiosResponse> => {
-    return axios.post(`/api/workspace/${data.workspace_id}/file/data`, data)
+    return axiosInstance.post(`/workspace/${data.workspace_id}/file/data`, data)
 }
 
 /**
@@ -69,7 +70,7 @@ export const saveFileContent = async (data: { workspace_id: string, file_id: str
  * @returns 
  */
 export const deleteFolderInWorkspace = async (data: { workspace_id: string, folder_id: string }): Promise<AxiosResponse> => {
-    return axios.delete(`/api/workspace/${data.workspace_id}/folder/${data.folder_id}`)
+    return axiosInstance.delete(`/workspace/${data.workspace_id}/folder/${data.folder_id}`)
 }
 
 /**
@@ -78,7 +79,7 @@ export const deleteFolderInWorkspace = async (data: { workspace_id: string, fold
  * @returns 
  */
 export const deleteFileInWorkspace = async (data: { workspace_id: string, file_id: string }): Promise<AxiosResponse> => {
-    return axios.delete(`/api/workspace/${data.workspace_id}/file/${data.file_id}`)
+    return axiosInstance.delete(`/workspace/${data.workspace_id}/file/${data.file_id}`)
 }
 
 export const renameFileFolder = async () => {

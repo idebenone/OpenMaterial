@@ -1,10 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Provider } from "react-redux";
 import "./index.css";
 
-import { store } from "./redux/store";
 import WorkSpace from "./pages/WorkSpace";
 import Home from "./pages/Home";
 import { Toaster } from "@/components/ui/sonner";
@@ -33,7 +31,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "callback/auth",
+    path: "auth/callback",
     element: <AuthCallback />,
   },
   {
@@ -44,9 +42,7 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Provider store={store}>
-      <RouterProvider router={router} />
-      <Toaster richColors />
-    </Provider>
+    <RouterProvider router={router} />
+    <Toaster richColors />
   </React.StrictMode>
 );

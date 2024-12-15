@@ -4,7 +4,7 @@ import AuthButtons from "./auth-buttons";
 
 export default function TopNav() {
   return (
-    <div className="w-full flex justify-center border-b">
+    <div className="fixed w-full flex justify-center border-b">
       <div className="w-1/2 flex justify-between items-center py-4">
         <Link to="/">
           <span className="flex items-center gap-2">

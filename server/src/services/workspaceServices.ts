@@ -15,7 +15,7 @@ import RESPONSE from "../utils/responses";
  */
 const getAllWorkspaces = async (req: Request, res: Response) => {
     try {
-        const workspaces = await Workspace.findAll({ where: { user_id: "dummy" } });
+        const workspaces = await Workspace.findAll({ where: { user_id: res.locals.user_id } });
         return res.status(200).json(RESPONSE.OK("", workspaces));
     } catch (error) {
         console.error("Error creating workspace:", error);
@@ -30,11 +30,11 @@ const getAllWorkspaces = async (req: Request, res: Response) => {
  * @returns 
  */
 const createWorkspace = async (req: Request, res: Response) => {
-    const { user_id, workspace_name, workspace_description } = req.body;
+    const { workspace_name, workspace_description } = req.body;
     const transaction = await Workspace.sequelize?.transaction();
     try {
         const newWorkspace = await Workspace.create(
-            { user_id, workspace_name, workspace_description },
+            { user_id: res.locals.user_id, workspace_name, workspace_description },
             { transaction }
         );
         const newFolder = await Folder.create(

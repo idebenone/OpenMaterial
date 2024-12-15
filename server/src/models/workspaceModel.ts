@@ -9,7 +9,7 @@ interface WorkspaceAttributes {
     workspace_description: string;
 }
 
-interface WorkspaceCreationAttributes { }
+interface WorkspaceCreationAttributes extends Optional<WorkspaceAttributes, "workspace_id"> { }
 
 class Workspace extends Model<WorkspaceAttributes, WorkspaceCreationAttributes> implements WorkspaceAttributes {
     public workspace_id!: string;

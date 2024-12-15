@@ -12,7 +12,7 @@ interface FolderAttributes {
     sub_folders?: FolderAttributes[],
 }
 
-interface FolderCreationAtrributes extends Optional<FolderAttributes, 'parent_id' | 'sub_folders' | 'files'> { }
+interface FolderCreationAtrributes extends Optional<FolderAttributes, 'folder_id' | 'parent_id' | 'sub_folders' | 'files'> { }
 
 class Folder extends Model<FolderAttributes, FolderCreationAtrributes> implements FolderAttributes {
     public folder_id!: string;

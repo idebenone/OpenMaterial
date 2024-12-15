@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { authenticate_github } from "@/api/auth";
 
 import { toast } from "sonner";
+import { localSync } from "@/api/local";
 
 export default function AuthCallback() {
   const [params] = useSearchParams();
@@ -21,7 +22,8 @@ export default function AuthCallback() {
 
   const handleGitCallback = async () => {
     try {
-      await authenticate_github(params.get("code") as string);
+      const response = await authenticate_github(params.get("code") as string);
+      localSync("token", response.data.DATA);
       navigate("/home");
       toast.success("Authentication was successful.");
     } catch (error) {

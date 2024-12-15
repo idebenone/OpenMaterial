@@ -51,16 +51,4 @@ User.init({
     timestamps: true
 })
 
-User.hasMany(Token, {
-    sourceKey: 'id',
-    foreignKey: 'user_id',
-    as: 'token'
-});
-
-User.hasOne(Session, {
-    sourceKey: 'id',
-    foreignKey: 'user_id',
-    as: 'session'
-})
-
 export { User, UserAttributes, UserCreationAttributes };

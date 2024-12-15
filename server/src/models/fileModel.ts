@@ -10,7 +10,7 @@ interface FileAttributes {
     workspace_id: string;
 }
 
-interface FileCreationAttributes extends Optional<FileAttributes, 'file_content'> { }
+interface FileCreationAttributes extends Optional<FileAttributes, 'file_content' | 'file_id'> { }
 
 class File extends Model<FileAttributes, FileCreationAttributes> implements FileAttributes {
     public file_id!: string;

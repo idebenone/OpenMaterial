@@ -5,7 +5,9 @@ export default function Shared() {
   return (
     <div className="h-full">
       <TopNav />
-      <Outlet />
+      <div className="pt-28">
+        <Outlet />
+      </div>
     </div>
   );
 }

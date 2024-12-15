@@ -24,5 +24,5 @@ export const authorize_github = (ALLOW_SIGNUP: boolean): string => {
  * @returns 
  */
 export const authenticate_github = async (code: string): Promise<AxiosResponse> => {
-    return await axios.get(`/api/auth/github?code=${code}`)
+    return await axios.get(`/api/auth/github/${code}`)
 }
