@@ -19,4 +19,11 @@ export type WorkspaceFile = {
     file_content: string
 }
 
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    pfp: string;
+}
+
 export type FileSystemItem = File | Folder;

@@ -1,6 +1,8 @@
 import { atomWithStorage } from 'jotai/utils'
-import { Folder, WorkspaceFile } from "./types";
+import { Folder, User, WorkspaceFile } from "./types";
 import { atom } from 'jotai';
+
+export const UserAtom = atom<User | null>();
 
 /**
  * File that is currently active in workspace.

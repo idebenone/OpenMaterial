@@ -10,6 +10,7 @@ const getUserData = async (req: Request, res: Response) => {
         }
         return res.status(200).json(RESPONSE.OK("", user))
     } catch (error) {
+        console.log(error)
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
     }
 }

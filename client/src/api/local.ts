@@ -1,10 +1,24 @@
-export function localSync(type: string, data: string | object) {
-    localStorage.setItem(type, typeof (data) === "object" ? JSON.stringify(data) : data);
+export function localSync(type: string, data: string | object): void {
+    const value = typeof data === "object" ? JSON.stringify(data) : data;
+    localStorage.setItem(type, value);
 }
 
-export function localFetch(type: string): string | { [key: string]: unknown }[] {
+export function localFetch(type: string): string | { [key: string]: unknown } {
     const data = localStorage.getItem(type);
-    return data ? typeof (data) === 'string' ? data : JSON.parse(data) : [];
+    if (!data) return "";
+    try {
+        const parsedData = JSON.parse(data);
+        if (typeof parsedData === "object" && parsedData !== null) return parsedData;
+    } catch {
+        return data;
+    }
+
+    return data;
+}
+
+
+export function localRemove(type: string) {
+    localStorage.removeItem(type);
 }
 
 export function localFlush() {

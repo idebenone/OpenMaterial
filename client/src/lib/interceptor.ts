@@ -1,4 +1,4 @@
-import { localFetch } from '@/api/local';
+import { localFetch, localRemove } from '@/api/local';
 import axios from 'axios';
 
 const axiosInstance = axios.create({
@@ -15,6 +15,19 @@ axiosInstance.interceptors.request.use(
         return config;
     },
     (error) => {
+        return Promise.reject(error);
+    }
+);
+
+axiosInstance.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    async (error) => {
+        if (error.response && error.response.status === 401) {
+            window.location.assign("/")
+            localRemove("token")
+        }
         return Promise.reject(error);
     }
 );

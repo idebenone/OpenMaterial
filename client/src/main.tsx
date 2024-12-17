@@ -10,6 +10,7 @@ import Landing from "./pages/Landing";
 import Shared from "./pages/Shared";
 import Material from "./pages/Material";
 import AuthCallback from "./pages/callback/auth";
+import Provider from "./providers";
 
 const router = createBrowserRouter([
   {
@@ -28,21 +29,25 @@ const router = createBrowserRouter([
         path: "material/:id",
         element: <Material />,
       },
+      {
+        path: "workspace/:id",
+        element: <WorkSpace />,
+      },
     ],
   },
   {
     path: "auth/callback",
     element: <AuthCallback />,
   },
-  {
-    path: "workspace/:id",
-    element: <WorkSpace />,
-  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
-    <Toaster richColors />
+    <Provider>
+      <>
+        <RouterProvider router={router} />
+        <Toaster richColors />
+      </>
+    </Provider>
   </React.StrictMode>
 );
