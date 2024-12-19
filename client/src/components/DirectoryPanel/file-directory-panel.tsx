@@ -1,4 +1,4 @@
-import FileDirectory from "./FileDirectory";
+import FileDirectory from "./file-directory";
 
 const FileDirectoryPanel = () => {
   return (

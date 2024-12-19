@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { deleteWorkspace, getWorkspaces } from "@/api/workspace";
 
-import { EllipsisVertical, Pencil, Trash } from "lucide-react";
+import { EllipsisVertical, Pencil, PlusCircle, Trash } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import CreateWorkspace from "@/components/dialog/create-workspace";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -54,7 +55,18 @@ export default function Home() {
 
   return (
     <div className="flex flex-col h-full w-full items-center">
-      <div className="w-1/3 flex gap-2">
+      <div className="w-1/3 flex justify-between items-center">
+        <p>Workspaces</p>
+        <Button
+          className="flex gap-2 items-center"
+          onClick={() => setDialogState(!dialogState)}
+        >
+          <p>Create</p>
+          <PlusCircle className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <div className="w-1/3 flex gap-2 mt-4">
         {loading ? (
           <>
             <Skeleton className="w-full h-[100px] rounded-lg" />

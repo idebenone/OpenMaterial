@@ -9,15 +9,17 @@ interface UserAttributes {
     name: string;
     email: string;
     pfp: string;
+    gh_username: string;
 }
 
-interface UserCreationAttributes extends Optional<UserAttributes, 'id'> { }
+interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'gh_username'> { }
 
 class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public id!: string;
     public name!: string;
     public email!: string;
     public pfp!: string;
+    public gh_username!: string;
 
     public token!: Token[];
     public session!: Session;
@@ -43,6 +45,11 @@ User.init({
     pfp: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+    gh_username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
     }
 }, {
     sequelize,

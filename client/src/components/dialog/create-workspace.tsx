@@ -1,6 +1,12 @@
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useNavigate } from "react-router-dom";
+
+import { Check } from "lucide-react";
+
+import { createWorkspace } from "@/api/workspace";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -15,20 +21,18 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-import { createWorkspace } from "@/api/workspace";
+import Spinner from "@/components/ui/spinner";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import Spinner from "../ui/spinner";
-import { Check } from "lucide-react";
+import { Switch } from "../ui/switch";
 
 const formSchema = z.object({
   workspace_name: z.string(),
   workspace_description: z.string(),
+  is_private: z.boolean(),
 });
 
 interface CreateWorkspaceProps {
@@ -48,6 +52,7 @@ const CreateWorkspace: React.FC<CreateWorkspaceProps> = ({
     defaultValues: {
       workspace_name: "",
       workspace_description: "",
+      is_private: false,
     },
   });
 
@@ -101,6 +106,26 @@ const CreateWorkspace: React.FC<CreateWorkspaceProps> = ({
                       <Input placeholder="Description" {...field} />
                     </FormControl>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="is_private"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-muted-foreground">
+                        Private
+                      </FormLabel>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        aria-readonly
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />

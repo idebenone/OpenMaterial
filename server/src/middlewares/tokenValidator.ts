@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import RESPONSE from "../utils/responses";
 import { verifyJWT } from "../utils/token";
 
-const TokenValidator = (
+const tokenValidator = (
     req: Request,
     res: Response,
     next: NextFunction
@@ -30,4 +30,4 @@ const TokenValidator = (
     return res.status(401).json(RESPONSE.UN_AUTHORIZED());
 };
 
-export default TokenValidator;
+export default tokenValidator;

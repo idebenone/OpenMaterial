@@ -10,11 +10,11 @@ import {
 } from "@/components/ui/resizable";
 import { File, X } from "lucide-react";
 
-import WorkSpacePanel from "@/components/WorkSpacePanel";
+import WorkSpacePanel from "@/components/workspace-panel";
 // import ReactFlowPanel from "@/components/ReactFlowPanel";
-import FileDirectoryPanel from "@/components/DirectoryPanel/FileDirectoryPanel";
+import FileDirectoryPanel from "@/components/DirectoryPanel/file-directory-panel";
 import { WorkspaceFile } from "@/lib/types";
-import Tiptap from "@/components/Editor/TipTap";
+import Tiptap from "@/components/Editor/tiptap";
 import { toast } from "sonner";
 import { saveFileContent } from "@/api/workspace";
 import { useParams } from "react-router-dom";

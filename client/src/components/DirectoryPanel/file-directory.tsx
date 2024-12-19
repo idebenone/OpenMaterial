@@ -26,7 +26,7 @@ import {
   fetchWorkspaceDirectory,
 } from "@/api/workspace";
 
-import TreeView from "./TreeView";
+import TreeView from "./tree-view";
 
 /**
  * Custom hook to fetch and manage workspace file directory.

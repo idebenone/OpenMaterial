@@ -4,7 +4,7 @@ dotenv.config();
 import { Request, Response } from "express";
 
 import RESPONSE from "../utils/responses";
-import generateHeaders from "../utils/github";
+import { getTokenResponse, getUserData } from "../utils/github";
 import { User } from "../models/userModel";
 import { Token } from "../models/tokenModel";
 import { generateJWT } from "../utils/token";
@@ -35,16 +35,7 @@ const authentication_GITHUB = async (req: Request, res: Response) => {
         /**
          * Fetch the access token based on the code from callback.
          */
-        const tokenResponse = await fetch(
-            `https://github.com/login/oauth/access_token?code=${code}&client_id=${clientId}&client_secret=${clientSecret}`,
-            {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                },
-            }
-        );
-
+        const tokenResponse = await getTokenResponse(code, clientId, clientSecret);
         const tokenData: AccessTokenResponse = await tokenResponse.json();
         if (!tokenData.access_token) {
             return res.status(400).json(RESPONSE.BAD_REQUEST);
@@ -53,10 +44,7 @@ const authentication_GITHUB = async (req: Request, res: Response) => {
         /**
          * Get user details from access_token.
          */
-        const userResponse = await fetch(`https://api.github.com/user`, {
-            headers: generateHeaders(tokenData.access_token),
-        });
-
+        const userResponse = await getUserData(tokenData.access_token);
         const userData = await userResponse.json();
         if (!userData.email) {
             return res.status(400).json(RESPONSE.BAD_REQUEST);
@@ -73,6 +61,7 @@ const authentication_GITHUB = async (req: Request, res: Response) => {
                     email: userData.email,
                     name: userData.name,
                     pfp: userData.avatar_url,
+                    gh_username: userData.login
                 },
                 { transaction }
             );

@@ -1,6 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../config/pgConnection";
 import { randomUUID } from "crypto";
+import { User } from "./userModel";
 
 interface SessionAttributes {
     session_id: string;
@@ -18,6 +19,8 @@ class Session extends Model<SessionAttributes, SessionCreationAttributes> implem
     public device!: string;
     public location!: string;
     public ip!: string;
+
+    public user!: User;
 }
 
 Session.init({
@@ -29,7 +32,7 @@ Session.init({
         unique: true,
     },
     user_id: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false,
     },
     device: {

@@ -4,6 +4,7 @@
 export interface CreateWorkspace {
     workspace_name: string;
     workspace_description: string;
+    is_private: boolean;
 }
 
 /**

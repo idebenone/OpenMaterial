@@ -6,9 +6,12 @@ import { Folder, FolderAttributes } from "../models/folderModel";
 import { Workspace } from "../models/workspaceModel";
 
 import RESPONSE from "../utils/responses";
+import { createRepository, deleteRepository } from "../utils/github";
+import { Token, User } from "../models";
 
 /**
  * Get all workspaces for an user.
+ * @source SERVER
  * @param req 
  * @param res 
  * @returns 
@@ -24,78 +27,60 @@ const getAllWorkspaces = async (req: Request, res: Response) => {
 }
 
 /**
- * Creates a workspace. 
+ * Creates a workspace in Github and on server. 
+ * @destination SERVER & GITHUB
  * @param req 
  * @param res 
  * @returns 
  */
 const createWorkspace = async (req: Request, res: Response) => {
-    const { workspace_name, workspace_description } = req.body;
-    const transaction = await Workspace.sequelize?.transaction();
+    const { workspace_name, workspace_description, is_private } = req.body;
+    if (!workspace_name || !workspace_description) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
-        const newWorkspace = await Workspace.create(
-            { user_id: res.locals.user_id, workspace_name, workspace_description },
-            { transaction }
+        /**
+        * Create a repository on Github.
+        */
+        const repositoryResponse = await createRepository(res.locals.gh_token, {
+            owner: res.locals.gh_owner,
+            name: workspace_name,
+            description: workspace_description,
+            include_all_branches: true,
+            private: is_private
+        })
+        /**
+         * Create a workspace on server.
+         */
+        await Workspace.create(
+            { user_id: res.locals.user_id, workspace_name, workspace_description, is_private },
         );
-        const newFolder = await Folder.create(
-            {
-                folder_id: uuidv4(),
-                folder_name: workspace_name,
-                parent_id: null,
-                workspace_id: newWorkspace.workspace_id,
-            },
-            { transaction }
-        );
-        await File.create(
-            {
-                file_id: uuidv4(),
-                file_name: "Readme",
-                file_content: "Welcome to OpenMaterial. Let's build a community together",
-                folder_id: newFolder.folder_id,
-                workspace_id: newWorkspace.workspace_id,
-            },
-            { transaction }
-        );
-        await transaction?.commit();
-        return res.status(201).json(RESPONSE.CREATED('', newWorkspace.workspace_id));
+
+        return res.status(201).json(RESPONSE.CREATED('', ""))
     } catch (error) {
-        console.error("Error creating workspace:", error);
-        await transaction?.rollback();
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
     }
 };
 
 /**
- * Delete a workspace along with files and folders.
+ * Delete workspace from server and Github.
  * @param req 
  * @param res 
  * @returns 
  */
 const deleteWorkspace = async (req: Request, res: Response) => {
-    const transaction = await Workspace.sequelize?.transaction();
+    const { workspace_name } = req.body;
+    if (!workspace_name) res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
-        const folders = await Folder.findAll({
-            where: { workspace_id: res.locals.workspace_id },
-            transaction,
-        });
-        const folderIds = folders.map(folder => folder.folder_id);
-        await File.destroy({
-            where: { folder_id: folderIds },
-            transaction,
-        });
-        await Folder.destroy({
-            where: { workspace_id: res.locals.workspace_id },
-            transaction,
-        });
         await Workspace.destroy({
             where: { workspace_id: res.locals.workspace_id },
-            transaction,
         });
-        await transaction?.commit();
+
+        await deleteRepository(res.locals.gh_token, {
+            owner: res.locals.gh_owner,
+            repo: workspace_name
+        })
+
         return res.status(200).json(RESPONSE.OK("Workspace and its contents deleted successfully"));
     } catch (error) {
-        console.error("Error deleting workspace:", error);
-        await transaction?.rollback();
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
     }
 };

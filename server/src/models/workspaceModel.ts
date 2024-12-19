@@ -7,6 +7,7 @@ interface WorkspaceAttributes {
     user_id: string;
     workspace_name: string;
     workspace_description: string;
+    is_private: boolean;
 }
 
 interface WorkspaceCreationAttributes extends Optional<WorkspaceAttributes, "workspace_id"> { }
@@ -16,6 +17,7 @@ class Workspace extends Model<WorkspaceAttributes, WorkspaceCreationAttributes> 
     public user_id!: string;
     public workspace_name!: string;
     public workspace_description!: string;
+    public is_private!: boolean;
 }
 
 Workspace.init({
@@ -39,6 +41,10 @@ Workspace.init({
         type: DataTypes.TEXT,
         allowNull: true
     },
+    is_private: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
 }, {
     sequelize,
     modelName: 'Workspace',

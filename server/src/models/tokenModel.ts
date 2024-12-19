@@ -30,7 +30,7 @@ Token.init({
         unique: true
     },
     user_id: {
-        type: DataTypes.STRING,
+        type: DataTypes.UUID,
         allowNull: false,
     },
     token_name: {
