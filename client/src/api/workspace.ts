@@ -11,7 +11,7 @@ export const getWorkspaces = async (): Promise<AxiosResponse> => {
 }
 
 /**
- * Creates a new workspace.
+ * Create a new workspace.
  * @param data {@link CreateWorkspace}
  * @returns 
  */
@@ -20,7 +20,7 @@ export const createWorkspace = async (data: CreateWorkspace): Promise<AxiosRespo
 }
 
 /**
- * Deletes a workspace along with files and folders.
+ * Delete a workspace.
  * @param workspace_id 
  * @returns 
  */
@@ -29,12 +29,22 @@ export const deleteWorkspace = async (workspace_id: string): Promise<AxiosRespon
 }
 
 /**
- * Fetches the directory of a workspace.
- * @param id - string 
+ * Update workspace.
+ * @param workspace_id 
+ * @param data 
  * @returns 
  */
-export const fetchWorkspaceDirectory = async (workspace_id: string): Promise<AxiosResponse> => {
-    return axiosInstance.get(`/workspace/${workspace_id}`);
+export const updateWorkspace = async (workspace_id: string, data: any): Promise<AxiosResponse> => {
+    return axiosInstance.patch(`/workspace/${workspace_id}`, data)
+}
+
+/**
+ * Fetch workspace content.
+ * @param workspace_id - string 
+ * @returns 
+ */
+export const fetchWorkspaceDirectory = async (workspace_id: string, data: any): Promise<AxiosResponse> => {
+    return axiosInstance.post(`/workspace/${workspace_id}`, data);
 }
 
 /**

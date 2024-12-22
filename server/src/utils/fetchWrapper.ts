@@ -29,6 +29,22 @@ export class FetchWrapper {
         };
     }
 
+    private async handleResponse(response: Response): Promise<any> {
+        if (!response.ok) {
+            // Throw an error with status and message for failed requests
+            const errorText = await response.text();
+            throw new Error(
+                `HTTP error! Status: ${response.status}, Message: ${response.statusText}, Details: ${errorText}`
+            );
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            return await response.json();
+        }
+        return await response.text();
+    }
+
     async request({ url, method = 'GET', headers = {}, params, data, ...customConfig }: FetchConfig): Promise<any> {
         const config = this.mergeConfig(customConfig);
         const fullURL = this.baseURL + url + (params ? `?${qs.stringify(params)}` : '');
@@ -42,20 +58,14 @@ export class FetchWrapper {
             },
             ...config,
         };
+
         if (data) {
             options.body = JSON.stringify(data);
         }
 
         try {
             const response = await fetch(fullURL, options);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}, Message: ${response.statusText}`);
-            }
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                return await response.json();
-            }
-            return await response.text();
+            return await this.handleResponse(response); // Automatically parse the response
         } catch (error) {
             throw error;
         }
@@ -74,10 +84,10 @@ export class FetchWrapper {
     }
 
     delete(url: string, data?: any, config: FetchConfig = {}): Promise<any> {
-        return this.request({ url, method: 'DELETE', ...config });
+        return this.request({ url, method: 'DELETE', data, ...config });
     }
 
     patch(url: string, data: any, config: FetchConfig = {}): Promise<any> {
-        return this.request({ url, method: 'PATCH', ...config });
+        return this.request({ url, method: 'PATCH', data, ...config });
     }
 }

@@ -6,12 +6,11 @@ import { Folder, FolderAttributes } from "../models/folderModel";
 import { Workspace } from "../models/workspaceModel";
 
 import RESPONSE from "../utils/responses";
-import { createRepository, deleteRepository } from "../utils/github";
-import { Token, User } from "../models";
+import { createRepository, deleteRepository, getRepositoryContent, updateRepository } from "../utils/github";
 
 /**
  * Get all workspaces for an user.
- * @source SERVER
+ * @source
  * @param req 
  * @param res 
  * @returns 
@@ -28,7 +27,7 @@ const getAllWorkspaces = async (req: Request, res: Response) => {
 
 /**
  * Creates a workspace in Github and on server. 
- * @destination SERVER & GITHUB
+ * @destination
  * @param req 
  * @param res 
  * @returns 
@@ -68,7 +67,7 @@ const createWorkspace = async (req: Request, res: Response) => {
  */
 const deleteWorkspace = async (req: Request, res: Response) => {
     const { workspace_name } = req.body;
-    if (!workspace_name) res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
+    if (!workspace_name) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
         await Workspace.destroy({
             where: { workspace_id: res.locals.workspace_id },
@@ -86,50 +85,42 @@ const deleteWorkspace = async (req: Request, res: Response) => {
 };
 
 /**
- * Fetches entire file directory of a workspace.
+ * Update workspace in server and Github.
  * @param req 
  * @param res 
  * @returns 
  */
-const getFileDirectory = async (req: Request, res: Response) => {
+const updateWorkspace = async (req: Request, res: Response) => {
+    const { old_workspace_name, workspace_name, workspace_description, is_private } = req.body
+    if (!old_workspace_name || !workspace_name) return res.status(422).json(RESPONSE.UNPROCESSABLE_ENTITY);
     try {
-        const getFolderRecursive = async (folderId: string) => {
-            const folder = await Folder.findByPk(folderId, {
-                include: [
-                    { model: File, as: 'files' },
-                    { model: Folder, as: 'sub_folders', include: ['files', 'sub_folders'] }
-                ]
-            });
+        await Workspace.update({ workspace_name, workspace_description, is_private },
+            { where: { workspace_id: res.locals.workspace_id } }
+        )
 
-            if (!folder) {
-                return null;
-            }
+        await updateRepository(res.locals.gh_token,
+            { owner: res.locals.gh_owner, repo: old_workspace_name },
+            { name: workspace_name, description: workspace_description, private: is_private })
 
-            const folderData = folder.toJSON() as FolderAttributes;
-            for (const subfolder of folderData.sub_folders || []) {
-                const nestedSubfolder = await getFolderRecursive(subfolder.folder_id);
-                subfolder.sub_folders = nestedSubfolder ? nestedSubfolder.sub_folders : [];
-                subfolder.files = nestedSubfolder ? nestedSubfolder.files : [];
-            }
+        return res.status(201).json(RESPONSE.CREATED("WORKSPACE HAS BEEN UPDATED"))
+    } catch (error) {
+        return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
+    }
+}
 
-            return folderData;
-        };
-
-        const rootFolders = await Folder.findAll({
-            where: { workspace_id: res.locals.workspace_id, parent_id: null },
-            include: [
-                { model: File, as: 'files' },
-                { model: Folder, as: 'sub_folders', include: ['files', 'sub_folders'] }
-            ]
-        });
-
-        const result = [];
-        for (const rootFolder of rootFolders) {
-            const nestedFolder = await getFolderRecursive(rootFolder.folder_id);
-            result.push(nestedFolder);
-        }
-
-        return res.status(200).json(RESPONSE.OK("", result[0]))
+/**
+ * Fetches content of a workspace.
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+const getWorkspaceContent = async (req: Request, res: Response) => {
+    const { workspace_name, path } = req.body;
+    try {
+        const content = await getRepositoryContent(res.locals.gh_token,
+            { owner: res.locals.gh_owner, path, repo: workspace_name },
+        )
+        return res.status(200).json(RESPONSE.OK("", content))
     } catch (error) {
         console.log(error)
         return res.status(500).json(RESPONSE.INTERNAL_SERVER_ERROR);
@@ -272,6 +263,7 @@ export {
     deleteFolder,
     deleteWorkspace,
     getAllWorkspaces,
-    getFileDirectory,
-    saveFileContent
+    getWorkspaceContent,
+    saveFileContent,
+    updateWorkspace
 };
